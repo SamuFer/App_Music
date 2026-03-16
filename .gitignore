@@ -1,0 +1,26 @@
+# Ignorar archivos y carpetas de la raiz del proyecto 
+
+# Dependencias (No se suben porque ocupan mucho, se instalan con npm install)
+node_modules/
+
+# .DS_Store es un archivo de sistema de macOS que no es necesario subir al repositorio
+.DS_Store
+
+# archivo de sistema de Windows que no es necesario subir al repositorio
+Thumbs.db
+
+# Archivos de configuración de editores
+.vscode/
+
+# Archivos de configuración de IDEs
+.idea/
+
+# Archivos de logs
+*.log
+
+# dist y build son carpetas de salida que se encargan de compilar el código fuente y su función es generar una versión optimizada para producción
+dist/
+build/
+
+# Variables de Entorno (¡VITAL! Aquí están tus contraseñas)
+.env

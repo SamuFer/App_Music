@@ -1,0 +1,19 @@
+# --- DEPENDENCIAS ESPECÍFICAS --- (se instalan con npm install, no se suben al repositorio)
+node_modules/
+
+# Variables de Entorno 
+# Aquí es donde están tus credenciales de Atlas y Spotify
+.env
+
+# --- LOGS DEL SERVIDOR ---
+npm-debug.log*
+*.log
+
+# --- SISTEMA OPERATIVO ---
+.DS_Store
+Thumbs.db
+# desktop.ini
+
+# --- ARCHIVOS DE DISTRIBUCIÓN ---
+dist/
+build/

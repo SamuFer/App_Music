@@ -1,0 +1,19 @@
+---
+// src/pages/votar.astro
+import type { Song } from '../types/song'
+import SpotifyPlayer from '../components/SpotifyPlayer.astro'
+
+// TODO: reemplazar con fetch a tu API cuando el backend esté listo
+// const song = await fetch('/api/songs/today').then(r => r.json())
+const song: Song = {
+  id: 'mock-1',
+  day: 16,
+  title: 'The Night Will Always Win',
+  artist: 'Manchester Orchestra',
+  spotifyTrackId: '4cluDES4hQEUhmXj6TXkSo',
+  theme: 'Canción para llorar y beber',
+  submittedBy: 'YoSoyRenato',
+  votingDeadline: new Date('2026-10-16T23:59:59'),
+  groupAverage: 7.4
+}
+---

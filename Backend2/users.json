@@ -1,0 +1,82 @@
+[
+    {
+        "id": 1,
+        "name": "Juan García",
+        "email": "juan.garcia@email.com",
+        "username": "juangarcia",
+        "password": "hashed_password_1",
+        "createdAt": "2024-01-15T10:30:00Z"
+    },
+    {
+        "id": 2,
+        "name": "Maria López",
+        "email": "maria.lopez@email.com",
+        "username": "marialopez",
+        "password": "hashed_password_2",
+        "createdAt": "2024-01-16T14:20:00Z"
+    },
+    {
+        "id": 3,
+        "name": "Juan Carlos Rodríguez",
+        "email": "carlos.rodriguez@email.com",
+        "username": "carlosrod",
+        "password": "hashed_password_3",
+        "createdAt": "2024-01-17T09:15:00Z"
+    },
+    {
+        "id": 4,
+        "name": "Ana Martínez",
+        "email": "ana.martinez@email.com",
+        "username": "anamartinez",
+        "password": "hashed_password_4",
+        "createdAt": "2024-01-18T16:45:00Z"
+    },
+    {
+        "id": 5,
+        "name": "Pedro Fernández",
+        "email": "pedro.fernandez@email.com",
+        "username": "pedrofern",
+        "password": "hashed_password_5",
+        "createdAt": "2024-01-19T11:00:00Z"
+    },
+    {
+        "id": 6,
+        "name": "Laura González",
+        "email": "laura.gonzalez@email.com",
+        "username": "lauragonz",
+        "password": "hashed_password_6",
+        "createdAt": "2024-01-20T13:30:00Z"
+    },
+    {
+        "id": 7,
+        "name": "Miguel Sánchez",
+        "email": "miguel.sanchez@email.com",
+        "username": "miguelsanch",
+        "password": "hashed_password_7",
+        "createdAt": "2024-01-21T10:20:00Z"
+    },
+    {
+        "id": 8,
+        "name": "Sofia Díaz",
+        "email": "sofia.diaz@email.com",
+        "username": "sofiadiaz",
+        "password": "hashed_password_8",
+        "createdAt": "2024-01-22T15:10:00Z"
+    },
+    {
+        "id": 9,
+        "name": "Roberto Moreno",
+        "email": "roberto.moreno@email.com",
+        "username": "robertomor",
+        "password": "hashed_password_9",
+        "createdAt": "2024-01-23T12:40:00Z"
+    },
+    {
+        "id": 10,
+        "name": "Elena Ruiz",
+        "email": "elena.ruiz@email.com",
+        "username": "elenaruiz",
+        "password": "hashed_password_10",
+        "createdAt": "2024-01-24T08:50:00Z"
+    }
+]

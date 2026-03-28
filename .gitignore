@@ -1,11 +1,3 @@
-# Ignorar archivos y carpetas de la raiz del proyecto 
-
-# Dependencias (No se suben porque ocupan mucho, se instalan con npm install)
-node_modules/
-
-# .DS_Store es un archivo de sistema de macOS que no es necesario subir al repositorio
-.DS_Store
-
 # archivo de sistema de Windows que no es necesario subir al repositorio
 Thumbs.db
 
@@ -22,5 +14,23 @@ Thumbs.db
 dist/
 build/
 
-# Variables de Entorno (¡VITAL! Aquí están tus contraseñas)
+
+# generated types
+.astro/
+
+# dependencies
+node_modules/
+
+# logs
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# environment variables
 .env
+.env.production
+
+# macOS-specific files
+.DS_Store
+

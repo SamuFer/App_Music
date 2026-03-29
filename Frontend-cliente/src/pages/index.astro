@@ -7,18 +7,20 @@ import SpotifyPlayer from '../components/SpotifyPlayer.astro'
 import ScoreForm from '../components/ScoreForm.astro'
 
 // TODO: reemplazar con fetch a tu API cuando el backend esté listo
-// const song = await fetch('/api/songs/today').then(r => r.json())
-const song: Song = {
-  id: 'mock-1',
-  day: 16,
-  title: 'The Night Will Always Win',
-  artist: 'Zutomayo - ミュージックトーバー',
-  spotifyTrackId: '6QJ4Z6FMnkznUCsrdUthyt',
-  theme: 'Canción para llorar y beber',
-  submittedBy: 'YoSoyRenato',
-  votingDeadline: new Date('2026-10-16T23:59:59'),
-  groupAverage: 7.4
-}
+const songs = await fetch('http://localhost:3000/songs').then(r => r.json())
+const song = songs[0]
+
+// const song: Song = {
+//   id: 'mock-1',
+//   day: 16,
+//   title: 'The Night Will Always Win',
+//   artist: 'Zutomayo - ミュージックトーバー',
+//   spotifyTrackId: '6QJ4Z6FMnkznUCsrdUthyt',
+//   theme: 'Canción para llorar y beber',
+//   submittedBy: 'YoSoyRenato',
+//   votingDeadline: new Date('2026-10-16T23:59:59'),
+//   groupAverage: 7.4
+// }
 ---
 
 <Layout title="MusicTober 2026">
@@ -44,9 +46,9 @@ const song: Song = {
 						</div>
 						<div>Por <span>YoSoyRenato</span></div>
 					</div>
-					<h1 class="font-vt text-[2.6rem] tracking-wide leading-none text-white mb-1" style="text-shadow: 3px 0 0 #ff2d78, -2px 0 0 #00f5ff">{song.title}</h1>
-					<p class="text-4 tracking-[3px] text-dim uppercase mb-4.5">[{song.artist}]</p>
-					<SpotifyPlayer trackId={song.spotifyTrackId}trackTitle=trackTitle={song.title} />
+					<h1 class="font-vt text-[2.6rem] tracking-wide leading-none text-white mb-1" style="text-shadow: 3px 0 0 #ff2d78, -2px 0 0 #00f5ff">{song?.title ?? 'Sin título'}</h1>
+					<p class="text-4 tracking-[3px] text-dim uppercase mb-4.5">[{song?.artist ?? 'Sin artista'}]</p>
+					<SpotifyPlayer trackId={song?.spotifyTrackId ?? ''}trackTitle=trackTitle={song?.title ?? ''}  />
 					<!-- <iframe
 						src=""
 						title="Reproductor de Spotify: Nombre de la canción"

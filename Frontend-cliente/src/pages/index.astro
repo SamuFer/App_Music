@@ -3,84 +3,88 @@ import Layout from '../layouts/Layout.astro';
 import '../styles/global.css';
 
 import type { Song } from '../types/song'
-import SpotifyPlayer from '../components/SpotifyPlayer.astro'
-import ScoreForm from '../components/ScoreForm.astro'
+// import SpotifyPlayer from '../components/SpotifyPlayer.astro'
+// import ScoreForm from '../components/ScoreForm.tsx'
+import SongSlider from '../components/SongSlider.tsx';
 
 // TODO: reemplazar con fetch a tu API cuando el backend esté listo
-const songs = await fetch('http://localhost:3000/songs').then(r => r.json())
-const song = songs[0]
+// let songs = []
+// let song = null  // ← inicializar en null, no undefined
 
-// const song: Song = {
-//   id: 'mock-1',
-//   day: 16,
-//   title: 'The Night Will Always Win',
-//   artist: 'Zutomayo - ミュージックトーバー',
-//   spotifyTrackId: '6QJ4Z6FMnkznUCsrdUthyt',
-//   theme: 'Canción para llorar y beber',
-//   submittedBy: 'YoSoyRenato',
-//   votingDeadline: new Date('2026-10-16T23:59:59'),
-//   groupAverage: 7.4
-// }
+// try {
+//   const res = await fetch('http://localhost:3000/songs')
+//   songs = await res.json()
+//   song = songs[0] ?? null
+// } catch (e) {
+//   console.error('Error cargando canciones:', e.message)
+// } 
+
+const songs: Song[] = [
+  {
+    id: '1',
+    day: 16,
+    title: 'The Night Will Always Win',
+    artist: 'Zutomayo - ミュージックトーバー',
+    spotifyTrackId: '6QJ4Z6FMnkznUCsrdUthyt',
+    theme: 'Canción para llorar y beber',
+    submittedBy: 'YoSoyRenato',
+    votingDeadline: new Date('2026-10-16T23:59:59'),
+    groupAverage: 7.4,
+  },
+  {
+    id: '2',
+    day: 16,
+    title: 'The Night Willasdasdlways Win',
+    artist: 'Zutomayo - ミュージックトーバー',
+    spotifyTrackId: '6QJ4Z6FMnkznUCsrdUthyt',
+    theme: 'Canción para llorar y beber',
+    submittedBy: 'YoSoyRenato',
+    votingDeadline: new Date('2026-10-16T23:59:59'),
+    groupAverage: 7.4,
+  }
+];
 ---
 
 <Layout title="MusicTober 2026">
 	<section class=" w-full text-white font-mono min-h-screen flex flex-col justify-center items-center px-2.5 py-14 gap-4 " aria-label="Canción en votación">
+		<SongSlider songs={songs} client:load />
 		<div class="w-full max-w-360 border-white border-2">
 
 			<!-- Metadata de la canción -->
-			<header class="bg-purple border-b border-pink px-5 py-8 flex items-center justify-between md:px-10">
+			<!-- <header class="bg-purple border-b border-pink px-5 py-8 flex items-center justify-between md:px-10">
 				<div class="block">
 					<span class="font-vt text-[0.95rem] tracking-[4px] text-white" aria-label="Día 16">DÍA 16</span>
 					<span class="font-vt text-[0.95rem] tracking-[4px] text-white" aria-hidden="true">—</span>
 					<span class="font-vt text-[0.95rem] tracking-[4px] text-white">En Votación</span>
 				</div>
 				<div>⏱ 1d 14h</div>
-			</header>
-
+			</header> -->
+<!-- 
 			<div class="flex flex-col w-full md:flex-row px-4 md:px-10 py-10 gap-4">
-				<!-- Info + reproductor -->
+
+				
 				<article aria-label="Canción del día" class="flex flex-col w-full pr-5 gap-4">
 					<div class="flex w-full justify-between gap-4">
 						<div>
-							// {song.theme}//
+							// {song?.theme}//
 						</div>
 						<div>Por <span>YoSoyRenato</span></div>
 					</div>
 					<h1 class="font-vt text-[2.6rem] tracking-wide leading-none text-white mb-1" style="text-shadow: 3px 0 0 #ff2d78, -2px 0 0 #00f5ff">{song?.title ?? 'Sin título'}</h1>
 					<p class="text-4 tracking-[3px] text-dim uppercase mb-4.5">[{song?.artist ?? 'Sin artista'}]</p>
 					<SpotifyPlayer trackId={song?.spotifyTrackId ?? ''}trackTitle=trackTitle={song?.title ?? ''}  />
-					<!-- <iframe
-						src=""
-						title="Reproductor de Spotify: Nombre de la canción"
-						allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture"
-					></iframe> -->
 				</article>
-	
-				<!-- Formulario de voto -->
-				<!-- <form class="flex flex-col w-[50%] items-center justify-between pl-5 gap-4 border-t border-dim pt-4 md:border-l-2 md:border-t-0 md:items-end" aria-label="Formulario de votación" method="post" action="/votar">
-					<fieldset>
-						<legend class="font-vt text-[0.8rem] tracking-[3px] text-dim mb-2">Tu puntuación</legend>
-						<div class="flex items-center gap-2">
-							<button type="button" aria-label="Reducir puntuación">−</button>
-							<output class="font-vt text-[3rem] leading-none text-yellow glow-yellow min-w-[44px] text-center" for="score" aria-live="polite">5</output>
-							<span class="font-vt text-[1rem] leading-none text-yellow glow-yellow min-w-[44px] text-center" aria-hidden="true">/10</span>
-							<button type="button" aria-label="Aumentar puntuación">+</button>
-							<input type="hidden" name="score" id="score" value="5">
-						</div>
-					</fieldset>
-					<button id="voteBtn" class="w-full mt-4.5 py-3.25 bg-transparent border border-pink text-pink font-vt text-[1.2rem] tracking-[6px] cursor-pointer relative overflow-hidden transition-colors hover:bg-[#ff2d78] hover:text-blue glow-pink" type="submit">[ Enviar voto ]</button>
-				</form> -->
 				<ScoreForm songId="mock-song-1" userId="mock-user-1" />
-			</div>
+			</div> -->
 
 			
 			
 		</div>
 		<!-- Navegación entre canciones -->
-		<nav class="flex w-full max-w-360 justify-between" aria-label="Navegar entre canciones">
+		<!-- <nav class="flex w-full max-w-360 justify-between" aria-label="Navegar entre canciones">
 			<a href="/votar/dia-15" rel="prev">← Canción anterior</a>
 			<a href="/votar/dia-17" rel="next">Siguiente canción →</a>
-		</nav>
+		</nav> -->
 	</section>
 	<!-- Quién ha votado -->
 	<!-- <aside aria-label="Estado de votos del grupo">

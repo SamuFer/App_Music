@@ -39,7 +39,7 @@ export class UserModel {
             createdAt: new Date().toISOString() 
         }  
         
-        jobs.push(newUser)
+        users.push(newUser)
 
         return newUser
     }

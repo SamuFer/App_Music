@@ -1,0 +1,128 @@
+---
+import Layout from '../layouts/Layout.astro';
+import '../styles/global.css';
+
+// 👇 Reemplaza esto con tu fetch al backend
+// const res = await fetch('https://tu-api.com/votaciones?userId=...');
+// const { votaciones, total } = await res.json();
+
+const votaciones = [
+  {
+    dia: 16,
+    tematica: "Canción para llorar y beber",
+    titulo: "The Night Will Always Win ...",
+    artista: "Zutomayo - ミュージックトーバー",
+    album: "ミュージックトーバー",
+    subidaPor: "YoSoyRenato",
+    calificacion: 7.5,
+    portada: "",
+  },
+  {
+    dia: 17,
+    tematica: "Canción para bailar sin parar",
+    titulo: "Dance on Me",
+    artista: "Dua Lipa",
+    album: "Levitating",
+    subidaPor: "DanceMaster",
+    calificacion: 8.7,
+    portada: "",
+  },
+  {
+    dia: 18,
+    tematica: "Canción para despertar el alma",
+    titulo: "Viva La Vida",
+    artista: "Coldplay",
+    album: "Viva La Vida",
+    subidaPor: "AlmaViajera",
+    calificacion: 9.0,
+    portada: "",
+  },
+];
+
+const total = 18;
+const paginaActual = 1;
+const totalPaginas = 2;
+
+---
+
+<Layout Title="Mis Votaciones">
+    <section class="w-full text-white flex flex-col justify-center items-center px-2.5 py-14 gap-4">
+        <div class="w-full max-w-360 mx-auto flex flex-col px-2.5 md:px-16 gap-4">
+            <div>
+                <h1>// Mis Votaciones</h1>
+                <p>Aquí podrás ver todas tus votaciones realizadas y filtrarlas por si estás interesado en algunas.</p>
+            </div>
+            <div class="w-full flex gap-4 flex-col">
+                <div class="">
+                    <form action="" method="post">
+                        <input type="text" placeholder="Buscar votaciones..." />
+                    </form>
+                </div>
+    
+                <div class="flex flex-col gap-4 w-full">
+                    <div class="flex justify-between">
+                        <span>Motrando 18 Votaciones</span>
+    
+                        <div class="flex">
+                            <div>página</div>
+                            <div>1 2 3 4 5</div>
+                        </div>
+    
+                    </div>
+                    <!-- <div class="wrapper overflow-scroll max-h-80">
+                        <div class="flex flex-col border-2 border-white p-4 w-full max-w-360">
+                            <div class="flex justify-between border-b-white border-b-2">
+                                <span>DÍA 16</span>
+                                <span>En Votación</span>
+                            </div>
+                            <div class="flex justify-between">
+                                <div class="flex gap-4">
+                                    <img src="" alt="imagen de la canción" />
+                                    <div class="flex flex-col">
+                                        <h2>Nombre de la canción</h2>
+                                        <span>Zutomayo - ミュージックトーバー</span>
+                                        <span>Subida por: YoSoyRenato</span>
+                                    </div>
+                                </div>
+                                <span>Calificación: 5/10</span>
+                            </div>
+                        </div>
+                    </div> -->
+    
+                     <div class="w-full overflow-y-scroll max-h-175 flex flex-col gap-4">
+                        {votaciones.map((v) => (
+                            <div class="flex flex-col border-2 border-white w-full max-w-360">
+                            {/* <!-- Cabecera de la card --> */}
+                            <div class="flex justify-between px-4 font-display">
+                                <span class="dia-label">&gt; Día {v.dia}</span>
+                                <span class="tematica-label">Temática: // {v.tematica} //</span>
+                            </div>
+    
+                            {/* <!-- Cuerpo de la card --> */}
+                            <div class="flex gap-4 justify-between px-4 py-2">
+                                <div class="flex gap-4">
+                                    <div class="aspect-square w-16 bg-gray-500">
+                                        {v.portada
+                                        ? <img src={v.portada} alt={`Portada de ${v.titulo}`} />
+                                        : <div class="bg-white aspect-square" />
+                                        }
+                                    </div>
+                                    <div class="flex flex-col">
+                                        <h2 class="font-display font-bold text-rose">{v.titulo}</h2>
+                                        <span>{v.artista} - {v.album}</span>
+                                        <span class="subida-por">Subida por: {v.subidaPor}</span>
+                                    </div>
+                                </div>
+                                    <div class="font-display flex gap-1">
+                                        <span class="text-xl font-bold text-rose">{v.calificacion.toFixed(1)}</span>
+                                        <span>/10</span>
+                                    </div>
+                                </div>
+                            </div>
+                        ))}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+</Layout>

@@ -1,10 +1,18 @@
-<header class="w-full sticky top-0 z-50 bg-black border-b border-dim h-[52px] flex items-center justify-between px-7 pb-7 border-b-2 border-white">
+<header class="w-full sticky top-0 z-50 bg-black border-b border-dim flex flex-col gap-4 items-center justify-between px-7 pb-7">
     <div class="flex w-full justify-between">
         <a href="/" aria-label="Ir al inicio">
             <img src="" alt="Musictober">
         </a>
-        <a href="/perfil">
-            <img src="" alt="Foto de perfil de Jorge">
+        <a href="/profile">
+            <img src="./profile.astro" alt="Foto de perfil de Jorge">
         </a>
     </div>
+    <nav class="text-white border-b-2 border-white border-2 w-full flex justify-center px-4 py-4">
+        <ul class="flex gap-4">
+            <li><a href="/">Votar</a></li>
+            <li><a href="/historial">Mis Votaciones</a></li>
+            <li><a href="/historial">¿Cómo funciona?</a></li>
+            <li><a href="/perfil">Ganadores Anteriores</a></li>
+        </ul>
+    </nav>
 </header>

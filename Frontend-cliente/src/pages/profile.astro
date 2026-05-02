@@ -1,0 +1,46 @@
+---
+import Layout from "../layouts/Layout.astro"
+import '../styles/global.css';
+
+---
+
+<Layout title="Perfil">
+    <section class="w-full text-white flex flex-col justify-center items-center py-14 gap-4">
+        <div class="w-full max-w-360 mx-auto flex flex-col px-2.5 md:px-16 gap-4">
+            <div>
+                <a class="flex gap-2 p-2 border-2 w-fit" href="/">Volver</a>
+            </div>
+
+            <div class="flex justify-between">
+
+                <div class="flex gap-4">
+                    <div class="border-2 border-rose p-2 aspect-square">
+                        <img src="" alt="imagen de perfil" />
+                    </div>
+                    <div class="flex flex-col gap-4">
+                        <h1 class="text-2xl font-bold">Nombre de usuario</h1>
+                        <div class="flex gap-1">
+                            <span>Conectado mediante Spotify</span>
+                            <span>-</span>
+                            <span>Miembro desde [date]</span>
+                        </div>
+                        <a class="flex gap-2 p-2 border-2 w-fit" href="">
+                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                <path d="M15 3H7C6.46957 3 5.96086 3.21071 5.58579 3.58579C5.21071 3.96086 5 4.46957 5 5V19C5 19.5304 5.21071 20.0391 5.58579 20.4142C5.96086 20.7893 6.46957 21 7 21H15M19 12L15 8M19 12L15 16M19 12H9" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                            </svg>
+                        Cerrar Sesión</a>
+                    </div>
+                </div>
+        
+                <div class="flex flex-col gap-4">
+                    Descargalo para:
+                    <div class="flex gap-4">
+                        <a href="">Android</a>
+                        <a href="">iOS</a>
+                    </div>
+                </div>
+            </div>
+    
+        </div>
+    </section>
+</Layout>

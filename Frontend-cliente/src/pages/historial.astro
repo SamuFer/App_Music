@@ -93,7 +93,7 @@ const totalPaginas = 2;
                         {votaciones.map((v) => (
                             <div class="flex flex-col border-2 border-white w-full max-w-360">
                             {/* <!-- Cabecera de la card --> */}
-                            <div class="flex justify-between px-4 font-display">
+                            <div class="flex justify-between px-4 font-display bg-linear-to-r from-black to-[#2C2C2C]">
                                 <span class="dia-label">&gt; Día {v.dia}</span>
                                 <span class="tematica-label">Temática: // {v.tematica} //</span>
                             </div>
@@ -113,8 +113,8 @@ const totalPaginas = 2;
                                         <span class="subida-por">Subida por: {v.subidaPor}</span>
                                     </div>
                                 </div>
-                                    <div class="font-display flex gap-1">
-                                        <span class="text-xl font-bold text-rose">{v.calificacion.toFixed(1)}</span>
+                                    <div class="font-display flex gap-2 justify-start items-baseline">
+                                        <span class="text-[2rem] font-bold text-rose">{v.calificacion.toFixed(1)}</span>
                                         <span>/10</span>
                                     </div>
                                 </div>

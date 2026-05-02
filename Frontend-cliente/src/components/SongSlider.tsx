@@ -34,10 +34,10 @@ export default function SongSlider({ songs }: Props) {
   return (
     <>
       {/* ── Tarjeta principal ── */}
-      <div className="w-full max-w-360 border-white border-2">
+      <div className="font-display w-full max-w-360 border-white border-2">
 
         {/* Cabecera */}
-        <header className="bg-purple border-b border-pink px-5 py-8 flex items-center justify-between md:px-10 text-white">
+        <header className="bg-linear-to-r from-black to-[#2C2C2C] border-b border-pink px-5 py-2 flex items-center justify-between md:px-5 text-white">
           <span className="text-[0.95rem] tracking-widest uppercase">
             DÍA {song.day} — En Votación
           </span>
@@ -53,7 +53,7 @@ export default function SongSlider({ songs }: Props) {
           {/* Columna izquierda — info + player */}
           <article className="flex flex-col w-full p-5 gap-4 border-b md:border-b-0 md:border-r border-white/20">
             <div className="flex w-full justify-between gap-4">
-              <div className="text-xs text-white/80 tracking-widest">
+              <div className="text-xs font-text text-white/80 tracking-widest">
                 // {song.theme} //
               </div>
               <div className="text-xs text-white/50">
@@ -62,14 +62,13 @@ export default function SongSlider({ songs }: Props) {
             </div>
 
             <h1
-              className="font-vt text-[2.6rem] tracking-wide leading-none text-white mb-1"
-              style={{ textShadow: "3px 0 0 #ff2d78, -2px 0 0 #00f5ff" }}
+              className="font-display font-bold text-[2.6rem] tracking-wide leading-none text-rose mb-1"
             >
               {song.title}
             </h1>
 
-            <p className="text-sm tracking-[3px] text-white uppercase">
-              [{song.artist}]
+            <p className="text-sm italic tracking-[3px] text-white uppercase">
+              {song.artist}
             </p>
 
             {/* TODO: reemplazar con <SpotifyPlayer> cuando esté listo */}

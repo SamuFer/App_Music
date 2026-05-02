@@ -80,8 +80,8 @@ export default function ScoreForm({ songId, userId }: Props) {
       className="flex flex-col w-full items-center justify-between pl-5 gap-4 border-t border-dim pt-4 md:border-l-2 md:border-t-0 md:items-end"
     >
       <fieldset className="border-none p-0 m-0">
-        <legend className="font-vt text-[0.8rem] tracking-[3px] text-dim mb-3 text-center md:text-right">
-          // TU PUNTUACIÓN
+        <legend className="font-vt text-[1.225rem] text-dim mb-3 text-center md:text-right">
+          // Tu puntuación
         </legend>
 
         <div className="flex items-center gap-4">
@@ -118,7 +118,7 @@ export default function ScoreForm({ songId, userId }: Props) {
                 if (!validate(val)) return;
                 setScore(val);
               }}
-              className={`font-vt text-[3rem] leading-none text-yellow glow-yellow w-22.5 text-center bg-transparent border-b focus:outline-none
+              className={`font-display text-[2.5rem] leading-none text-yellow glow-yellow w-22.5 text-center bg-transparent border-b focus:outline-none text-rose font-bold
                 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none
                 ${error ? "border-pink" : "border-dim focus:border-cyan"}`}
             />
@@ -154,17 +154,17 @@ export default function ScoreForm({ songId, userId }: Props) {
       <button
         type="submit"
         disabled={btnState === "loading" || btnState === "success"}
-        className={`w-full mt-4.5 py-3.25 bg-transparent font-vt text-[1.2rem] tracking-[6px] cursor-pointer relative overflow-hidden transition-colors
+        className={`w-full mt-4.5 py-3.25 bg-rose font-vt text-[1.2rem] text-black-m font-bold cursor-pointer relative overflow-hidden transition-colors hover:border-rose hover:text-rose
           ${btnState === "success"
             ? "border border-cyan text-cyan glow-cyan"
-            : "border border-pink text-pink glow-pink hover:bg-[#ff2d78]"
+            : "border border-pink text-pink glow-pink hover:bg-transparent"
           }`}
       >
         {btnState === "loading"
           ? "[ ENVIANDO... ]"
           : btnState === "success"
           ? "[ ✓ VOTO REGISTRADO ]"
-          : "[ ENVIAR VOTO ]"}
+          : "[ Enviar tu Voto ]"}
       </button>
 
       {/* Estado del envío */}

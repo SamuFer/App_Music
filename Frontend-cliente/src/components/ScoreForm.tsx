@@ -154,7 +154,7 @@ export default function ScoreForm({ songId, userId }: Props) {
       <button
         type="submit"
         disabled={btnState === "loading" || btnState === "success"}
-        className={`w-full mt-4.5 py-3.25 bg-rose font-vt text-[1.2rem] text-black-m font-bold cursor-pointer relative overflow-hidden transition-colors hover:border-rose hover:text-rose
+        className={`w-full mt-4.5 py-3.25 bg-rose font-vt text-[1.2rem] text-black-m font-bold cursor-pointer relative overflow-hidden transition-colors outline-[1.8px] -outline-offset-8  hover:text-rose
           ${btnState === "success"
             ? "border border-cyan text-cyan glow-cyan"
             : "border border-pink text-pink glow-pink hover:bg-transparent"

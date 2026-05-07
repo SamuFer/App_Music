@@ -2,6 +2,7 @@
 import Header from '../components/Header.astro';
 const { title, description } = Astro.props
 
+
 ---
 
 <!doctype html>
@@ -15,6 +16,31 @@ const { title, description } = Astro.props
 		<title>{title}</title>
 		<meta name="description" content={description} />
 		
+
+		<script>
+			import { initSession } from '../stores/sessionStore'
+			import { getSession } from '../services/auth'
+			import { logoutUser } from '../stores/sessionStore'
+
+			initSession()
+
+			const PUBLIC_ROUTES = ['/login', '/register']
+
+			const currentPath = window.location.pathname
+			const isPublic = PUBLIC_ROUTES.includes(currentPath)
+			const session = getSession()
+
+			if (!isPublic && !session) {
+				window.location.href = '/login'
+			}
+
+			if (isPublic && session) {
+				window.location.href = '/'
+			}
+
+
+  			document.getElementById('logout-btn')?.addEventListener('click', logoutUser)
+		</script>
 	</head>
 	<body class="bg-black-m text-white">
 		<Header />
@@ -22,4 +48,5 @@ const { title, description } = Astro.props
 			<slot />
 		</main>
 	</body>
+	
 </html>

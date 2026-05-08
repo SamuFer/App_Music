@@ -1,0 +1,35 @@
+---
+import Layout from '../layouts/Layout-login.astro';
+import '../styles/global.css';
+
+---
+
+<Layout title="MusicTober 2026">
+    <section class=" w-full text-white flex flex-col justify-center items-center px-2.5 py-14 gap-4 " aria-label="Formulario de registro">
+        <img src="./logo.avif" alt="logo de MusicTober" class="w-50 mb-6">
+        <h1 class="text-3xl font-display text-center text-rose">¡Únete a MusicTober 2026!</h1>
+        <p class="text-sm text-center max-w-md">Regístrate para participar en la votación diaria de canciones durante todo octubre. ¡Comparte tu música favorita y descubre nuevas joyas cada día!</p>
+        <form class="w-full max-w-sm p-6 rounded-lg flex flex-col gap-8">
+            <div class="flex flex-col gap-4">
+                <div class="flex flex-col gap-4">
+                    <label class="font-display text-sm text-gray-400" for="username">Nombre de Usuario</label>
+                    <input type="text" placeholder="Nombre de usuario" class="bg-white/5 border border-white/10 px-4 py-2.5 pr-12 text-white placeholder:text-gray-600 focus:outline-none focus:border-white/30 transition w-full" required>
+                </div>
+                
+                <div class="flex flex-col gap-4">
+                    <label class="font-display text-sm text-gray-400" for="email">Correo Electrónico</label>
+                    <input type="email" placeholder="Correo electrónico" class="bg-white/5 border border-white/10 px-4 py-2.5 pr-12 text-white placeholder:text-gray-600 focus:outline-none focus:border-white/30 transition w-full" required>
+                </div>
+    
+                <div class="flex flex-col gap-4">
+                    <label class="font-display text-sm text-gray-400" for="password">Contraseña</label>
+                    <input type="password" placeholder="Contraseña" class="bg-white/5 border border-white/10 px-4 py-2.5 pr-12 text-white placeholder:text-gray-600 focus:outline-none focus:border-white/30 transition w-full" required>
+                </div>
+            </div>
+            <button type="submit" class="font-display bg-white text-black font-semibold py-2.5 hover:bg-gray-200 transition outline-[1.8px] -outline-offset-7 disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer" aria-label="Registrarse">
+                [ Registrarse ]
+            </button>
+        </form>
+    </section>
+	
+</Layout>

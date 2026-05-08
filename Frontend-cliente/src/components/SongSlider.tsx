@@ -1,3 +1,4 @@
+// src/components/SongSlider.tsx
 import { useState } from "react";
 import type { Song } from "../types/song";
 import SpotifyPlayer from './SpotifyPlayer.tsx'
@@ -7,32 +8,55 @@ interface Props {
   songs: Song[];
 }
 
-export default function SongSlider({ songs }: Props) {
+export default function SongSlider({ songs: initialSongs }: Props) {
+  const [songs, setSongs] = useState<Song[]>(initialSongs);
   const [current, setCurrent] = useState(0);
+  const total = initialSongs.length; // fijo desde el inicio, no cambia
+
+  const voted = total - songs.length;
+  const percent = total > 0 ? Math.round((voted / total) * 100) : 0;
+
+  // Al votar con éxito: elimina la canción actual de la lista pendiente
+  const handleVoteSuccess = () => {
+    setSongs((prev) => {
+      const next = prev.filter((_, i) => i !== current);
+      // Si el índice actual ya no existe, retrocede uno
+      if (current >= next.length && next.length > 0) {
+        setCurrent(next.length - 1);
+      }
+      return next;
+    });
+  };
 
   // --- Estado: sin canciones que votar ---
-  if (!songs || songs.length === 0) {
+  if (songs.length === 0) {
     return (
-      <div className="flex flex-col items-center justify-center py-20 gap-4 text-center">
-        <span className="text-5xl">🎉</span>
-        <h2 className="text-2xl font-bold text-white">
-          ¡Todas las canciones están votadas!
-        </h2>
-        <p className="text-gray-400 text-sm">
-          Vuelve más tarde para ver los resultados.
-        </p>
+      <div className="w-full max-w-360 flex flex-col items-center gap-6">
+        <ProgressBar voted={total} total={total} percent={100} />
+        <div className="flex flex-col items-center justify-center py-16 gap-4 text-center">
+          <span className="text-5xl">🎉</span>
+          <h2 className="font-vt text-2xl text-white tracking-widest">
+            ¡Todas las canciones votadas!
+          </h2>
+          <p className="font-vt text-dim text-sm tracking-[2px]">
+            // Vuelve más tarde para ver los resultados
+          </p>
+        </div>
       </div>
     );
   }
 
   const song = songs[current];
-  const total = songs.length;
+  const remaining = songs.length;
 
-  const prev = () => setCurrent((i) => (i - 1 + total) % total);
-  const next = () => setCurrent((i) => (i + 1) % total);
+  const prev = () => setCurrent((i) => (i - 1 + remaining) % remaining);
+  const next = () => setCurrent((i) => (i + 1) % remaining);
 
   return (
     <>
+      {/* ── Barra de progreso ── */}
+      <ProgressBar voted={voted} total={total} percent={percent} />
+
       {/* ── Tarjeta principal ── */}
       <div className="font-display w-full max-w-360 border-white border-2">
 
@@ -41,7 +65,6 @@ export default function SongSlider({ songs }: Props) {
           <span className="text-[0.95rem] tracking-widest uppercase">
             DÍA {song.day} — En Votación
           </span>
-          {/* TODO: calcular tiempo restante real desde song.votingDeadline */}
           <span className="text-[0.95rem] flex items-center gap-1">
             ⏱ 1d 14h
           </span>
@@ -61,9 +84,7 @@ export default function SongSlider({ songs }: Props) {
               </div>
             </div>
 
-            <h1
-              className="font-display font-bold text-[2.6rem] tracking-wide leading-none text-rose mb-1"
-            >
+            <h1 className="font-display font-bold text-[1.8rem] md:text-[2.6rem] tracking-wide leading-none text-rose mb-1">
               {song.title}
             </h1>
 
@@ -71,7 +92,6 @@ export default function SongSlider({ songs }: Props) {
               {song.artist}
             </p>
 
-            {/* TODO: reemplazar con <SpotifyPlayer> cuando esté listo */}
             <div className="mt-2 border border-dashed border-white/20 rounded p-4 text-white/30 text-xs text-center tracking-widest">
               <SpotifyPlayer trackId={song.spotifyTrackId} trackTitle={song.title} />
             </div>
@@ -79,7 +99,11 @@ export default function SongSlider({ songs }: Props) {
 
           {/* Columna derecha — ScoreForm */}
           <div className="flex flex-col w-full md:w-1/2 p-5 justify-center items-right">
-            <ScoreForm songId={song.id} userId="mock-user-1" />
+            <ScoreForm
+              songId={song.id}
+              userId="mock-user-1"
+              onVoteSuccess={handleVoteSuccess}
+            />
           </div>
 
         </div>
@@ -95,9 +119,8 @@ export default function SongSlider({ songs }: Props) {
           ← Canción anterior
         </button>
 
-        {/* Indicador de posición */}
         <span className="text-xs text-white/30 tracking-widest">
-          {current + 1} / {total}
+          {current + 1} / {remaining}
         </span>
 
         <button
@@ -109,5 +132,35 @@ export default function SongSlider({ songs }: Props) {
         </button>
       </nav>
     </>
+  );
+}
+
+// ── Componente auxiliar de barra ───────────────────────────────────────────────
+function ProgressBar({ voted, total, percent }: { voted: number; total: number; percent: number }) {
+  return (
+    <div
+      className="w-full max-w-360"
+      role="progressbar"
+      aria-valuenow={voted}
+      aria-valuemin={0}
+      aria-valuemax={total}
+      aria-label={`${voted} de ${total} canciones votadas`}
+    >
+      <div className="font-display flex justify-between items-center mb-1.5">
+        <span className="text-[0.75rem] tracking-[2px] text-dim">
+          PROGRESO DE VOTACIÓN
+        </span>
+        <span className="font-vt text-[0.75rem] tracking-[2px] text-dim">
+          <span className="text-cyan">{voted}</span> / {total} votadas
+        </span>
+      </div>
+
+      <div className="w-full h-1.5 bg-dim/30 border border-dim/40">
+        <div
+          className="h-full bg-rose transition-all duration-500"
+          style={{ width: `${percent}%` }}
+        />
+      </div>
+    </div>
   );
 }

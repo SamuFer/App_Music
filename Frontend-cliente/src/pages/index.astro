@@ -43,10 +43,12 @@ const songs: Song[] = [
     groupAverage: 7.4,
   }
 ];
+
+
 ---
 
 <Layout title="MusicTober 2026">
-	<section class=" w-full text-white font-mono min-h-screen flex flex-col justify-center items-center px-2.5 py-14 gap-4 " aria-label="Canción en votación">
+	<section class=" w-full text-white flex flex-col justify-center items-center px-2.5 py-14 gap-4 " aria-label="Canción en votación">
 		<SongSlider songs={songs} client:load />
 		<div class="w-full max-w-360 border-white border-2">
 

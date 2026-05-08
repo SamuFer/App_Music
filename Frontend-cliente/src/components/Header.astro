@@ -1,10 +1,13 @@
 <header class="w-full sticky top-0 z-50 bg-black border-b border-dim flex flex-col gap-4 items-center justify-between px-4 md:px-7 py-7">
-    <div class="flex w-full justify-between">
-        <a class="max-w-50 md:max-w-70" href="/" aria-label="Ir al inicio">
+    <div class="flex w-full justify-between gap-4 items-center">
+        <a class="max-w-50 md:max-w-55" href="/" aria-label="Ir al inicio">
             <img src="./logo.avif" alt="Musictober">
         </a>
-        <a href="/profile">
-            <img src="./profile.astro" alt="Foto de perfil de Jorge">
+        <a class="flex items-center gap-4" href="/profile">
+            <div class="max-w-10 aspect-square">
+                <img id="header-avatar" src="./profile.astro" alt="Foto de perfil de Jorge">
+            </div>
+            <span id="header-name" class="font-display">Nombre</span>
         </a>
     </div>
     <nav class="text-white border-b-2 border-white border-2 w-full flex justify-center px-4 py-4">
@@ -15,4 +18,16 @@
             <li><a href="/perfil">Ganadores Anteriores</a></li>
         </ul>
     </nav>
+    <script>
+        import { getSession } from '../services/auth'
+        import { getUserAvatar } from '../stores/sessionStore'
+        const user = getSession()?.user
+        const avatar = document.getElementById('header-avatar') as HTMLImageElement
+        if (avatar) {
+            avatar.src = getUserAvatar(user)
+            avatar.alt = user?.name || 'Foto de perfil'
+        }
+        const nameEl = document.getElementById('header-name')
+        if (nameEl && user) nameEl.textContent = "[ "+ user.name + " ]"
+    </script>
 </header>

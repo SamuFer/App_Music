@@ -1,6 +1,9 @@
 ---
 import Layout from "../layouts/Layout.astro"
 import '../styles/global.css';
+// const userPhoto = false; // o la variable real con la URL de la foto
+// const fallbackPhoto = "./pred_photo.png";
+// const displayPhoto = userPhoto || fallbackPhoto;
 
 ---
 
@@ -8,23 +11,30 @@ import '../styles/global.css';
     <section class="w-full text-white flex flex-col justify-center items-center py-14 gap-4">
         <div class="w-full max-w-360 mx-auto flex flex-col px-2.5 md:px-16 gap-4">
             <div>
-                <a class="flex gap-2 p-2 border-2 w-fit" href="/">Volver</a>
+                <a class="flex gap-2 p-2 border-2 w-fit hover:bg-white/20 transition" href="/">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24">
+                        <g fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2">
+                            <path d="m8 5l-5 5l5 5" />
+                            <path d="M3 10h8c5.523 0 10 4.477 10 10v1" />
+                        </g>
+                    </svg>
+                Volver</a>
             </div>
 
-            <div class="flex justify-between">
+            <div class="flex flex-col md:flex-row justify-between gap-6">
 
                 <div class="flex gap-4">
-                    <div class="border-2 border-rose p-2 aspect-square">
-                        <img src="" alt="imagen de perfil" />
+                    <div class="border-2 border-rose p-2 aspect-square h-fit">
+                        <img id="profile-avatar" src="" alt="imagen de perfil" />
                     </div>
                     <div class="flex flex-col gap-4">
-                        <h1 class="text-2xl font-bold">Nombre de usuario</h1>
+                        <h1 id="profile-name" class="text-2xl font-bold">Nombre de usuario</h1>
                         <div class="flex gap-1">
                             <span>Conectado mediante Spotify</span>
                             <span>-</span>
                             <span>Miembro desde [date]</span>
                         </div>
-                        <a id="logout-btn" class="flex gap-2 p-2 border-2 w-fit cursor-pointer">
+                        <a id="logout-btn" class="flex gap-2 p-2 border-2 w-fit cursor-pointer hover:bg-white/20 transition">
                             <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                                 <path d="M15 3H7C6.46957 3 5.96086 3.21071 5.58579 3.58579C5.21071 3.96086 5 4.46957 5 5V19C5 19.5304 5.21071 20.0391 5.58579 20.4142C5.96086 20.7893 6.46957 21 7 21H15M19 12L15 8M19 12L15 16M19 12H9" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
                             </svg>
@@ -44,4 +54,13 @@ import '../styles/global.css';
     
         </div>
     </section>
+    <script>
+        import { getSession } from '../services/auth'
+        import { getUserAvatar } from '../stores/sessionStore'
+        const user = getSession()?.user
+        const avatar = document.getElementById('profile-avatar') as HTMLImageElement
+        if (avatar) avatar.src = getUserAvatar(user)
+        const nameEl = document.getElementById('profile-name')
+        if (nameEl && user) nameEl.textContent = user.name
+    </script>
 </Layout>

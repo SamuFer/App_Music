@@ -7,7 +7,7 @@ const MOCK_USERS: User[] = [
     id: '1',
     email: 'test@test.com',
     name: 'Usuario Test',
-    avatarUrl: 'https://i.pravatar.cc/150?img=1',
+    avatarUrl: '',
     authProvider: 'email',
   },
 ]
@@ -81,7 +81,7 @@ export function loginWithSpotify(): void {
       id: '2',
       email: 'spotify@test.com',
       name: 'Usuario Spotify',
-      avatarUrl: 'https://i.pravatar.cc/150?img=2',
+      avatarUrl: '',
       authProvider: 'spotify',
     }
     saveSession(spotifyUser, 'mock-spotify-token-456')

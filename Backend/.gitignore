@@ -1,4 +1,4 @@
-# --- DEPENDENCIAS ESPECÍFICAS --- (se instalan con npm install, no se suben al repositorio)
+# --- DEPENDENCIAS ESPECÍFICAS --- (se instalan con npm install)
 node_modules/
 
 # Variables de Entorno 

@@ -1,4 +1,4 @@
-import { UserModel } from '../../models/user.model.js';
+import { UserService } from '../../services/user.service.js';
 import { DEFAULTS } from '../../config/index.js';
 
   export const UserAdminController = class {
@@ -7,10 +7,10 @@ import { DEFAULTS } from '../../config/index.js';
     static async getAll(req, res) {
       try {
         const { name, limit, offset } = req.query 
-        const {users, total} = await UserModel.getAllAdmin({ name, limit, offset })
+        const {users, total} = await UserService.getAllAdmin({ name, limit, offset })
         return res.json({
                 data: users,
-                pagination: {
+                pagination: { // puede separar la pagination en un helper o función aparte si quieres, pero no es obligatorio
                   totalDocuments: total,
                   count: users.length,
                   limit: Number(limit) || DEFAULTS.LIMIT_PAGINATION,
@@ -18,21 +18,7 @@ import { DEFAULTS } from '../../config/index.js';
                 }
               });
       } catch (error) {
-        return res.status(500).json({ error: 'Error al obtener la lista completa' });
-      }
-    }
-
-    // 2. OBTENER UN USUARIO POR ID
-    static async getById(req, res) {
-      try {
-        const { id } = req.params;
-        const user = await UserModel.getById(id);
-        
-        if (!user) return res.status(404).json({ error: "Usuario no encontrado" });
-        
-        return res.json(user);
-      } catch (error) {
-        return res.status(500).json({ error: "ID no válido o error de servidor" });
+        return res.status(500).json({ error: 'Error al obtener la lista completa o error de servidor' });
       }
     }
 
@@ -45,7 +31,7 @@ import { DEFAULTS } from '../../config/index.js';
             return res.status(400).json({ error: "Nombre, email y password son obligatorios" });
           }
 
-          const newUser = await UserModel.create({ 
+          const newUser = await UserService.create({ 
             name, 
             email, 
             password, 
@@ -53,7 +39,7 @@ import { DEFAULTS } from '../../config/index.js';
           });
 
           return res.status(201).json({
-            message: "Usuario creado por administrador",
+            message: "Usuario creado exitosamente por el administrador",
             data: newUser
           });
       } catch (error) {
@@ -61,16 +47,34 @@ import { DEFAULTS } from '../../config/index.js';
       }
     }
 
+    // 2. OBTENER UN USUARIO POR ID
+    static async getById(req, res) {
+      try {
+        const { id } = req.params;
+        const user = await UserService.getById(id);
+        
+        if (!user) return res.status(404).json({ error: "Usuario no encontrado" });
+        
+        return res.json(user);
+      } catch (error) {
+        return res.status(500).json({ error: "ID no válido o error de servidor" });
+      }
+    }
+
     // 4. ACTUALIZAR
     static async update(req, res) {
       try {
         const { id } = req.params;
+        
+        // SEGURIDAD: Solo permitimos editar estos campos
+        const { name, email, role } = req.body;
+        const updateData = { name, email, role };
 
-        const updatedUser = await UserModel.update(id, req.body);
+        const updatedUser = await UserService.update(id, updateData);
 
-        if (!updatedUser) return res.status(404).json({ error: "Usuario no existe" });
+        if (!updatedUser) return res.status(404).json({ error: "Usuario no encontrado" });
 
-        return res.json({ message: "Usuario actualizado", data: updatedUser });
+        return res.json({ message: "Actualizado correctamente", data: updatedUser });
       } catch (error) {
         return res.status(400).json({ error: error.message });
       }
@@ -80,15 +84,15 @@ import { DEFAULTS } from '../../config/index.js';
     static async delete(req, res) {
       try {
         const { id } = req.params;
-        const deletedUser = await UserModel.delete(id);
+        const deletedUser = await UserService.delete(id);
 
-        if (!deletedUser) return res.status(404).json({ error: "Usuario no existe" });
+        if (!deletedUser) return res.status(404).json({ error: "Usuario no encontrado" });
 
-        return res.json({
-          message: `Usuario ${deletedUser.email} eliminado permanentemente`
-        });
+        return res.json({message: `Usuario ${deletedUser.email} eliminado permanentemente`});
       } catch (error) {
         return res.status(500).json({ error: "Error al eliminar" });
       }
     }
+
+    
   };

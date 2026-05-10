@@ -1,13 +1,13 @@
-import { UserModel} from '../../models/user.model.js';
+import { UserService} from '../../services/user.service.js';
 import { DEFAULTS } from '../../config/index.js';
 
-export const UserController = class {
+export const UserClientController = class {
   static async getAll(req, res) {
     try {
      
       const { name, limit, offset } = req.query;
 
-      const { users, total } = await UserModel.getAll({ name, limit, offset });
+      const { users, total } = await UserService.getAll({ name, limit, offset });
 
       return res.json({
         data: users,

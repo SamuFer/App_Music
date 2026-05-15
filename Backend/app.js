@@ -2,8 +2,11 @@ import express from 'express'
 import { useresRouter } from './routes/users.js' // usuarios a traves de json 
 // import { songsRouter } from './routes/songs.js'
 import { clientUserRoutes } from './routes/v1/client/user.routes.js' // usuarios a traves de mongoDB
+import { clientThemeRoutes } from './routes/v1/client/theme.routes.js'
 
 import { adminUserRoutes } from './routes/v1/admin/user.routes.js' 
+import { adminThemeRoutes } from './routes/v1/admin/theme.routes.js'
+
 import { corsMiddleware } from './middlewares/cors.js'
 // import { DEFAULTS } from './config.js'
 import { connectDB, SERVER_CONFIG } from './config/index.js'
@@ -30,10 +33,12 @@ app.use('/api/users', useresRouter)
 // app.use('/api/songs', songsRouter) 
 
 // Las rutas del usuario
-app.use('/api/v1/users', clientUserRoutes);
+app.use('/api/v1/users', clientUserRoutes)
+app.use('/api/v1/themes', clientThemeRoutes)
 
 // Las rutas de admin
-app.use('/api/v1/admin/users', adminUserRoutes);
+app.use('/api/v1/admin/users', adminUserRoutes)
+app.use('/api/v1/admin/themes', adminThemeRoutes)
 
 // Conexion a la base de datos
 connectDB();

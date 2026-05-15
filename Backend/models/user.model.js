@@ -1,4 +1,5 @@
-import mongoose from 'mongoose';
+import mongoose from 'mongoose'
+import { normalizeJson } from '../utils/model.helper.js'
 
 const userSchema = new mongoose.Schema({
     name: {
@@ -28,15 +29,8 @@ const userSchema = new mongoose.Schema({
 });
 
 // Configuramos el método toJSON para transformar la salida de los documentos
-userSchema.set('toJSON', {
-    transform: (doc, ret) => {        
-        ret.id = ret._id.toString();
-        delete ret._id;
-        delete ret.__v;
-        delete ret.password; // No exponemos la contraseña
-        return ret;
-    }
-});
+// Solo le dices qué campo extra quieres ocultar por seguridad en normalizeJson, en este caso el password, y el helper se encarga de todo.
+userSchema.set('toJSON', normalizeJson(['password']));
 
 export const User = mongoose.model('user', userSchema);
 

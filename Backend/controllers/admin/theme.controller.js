@@ -1,5 +1,6 @@
 import { ThemeService } from "../../services/theme.service.js"
 import { DEFAULTS } from "../../config/index.js";
+import { formatPaginatedResponse } from "../../utils/pagination.helper.js"
 
 export const ThemeAdminController = class {
     // OBTENER TODAS LAS TEMÁTICAS CON PAGINACIÓN
@@ -10,15 +11,10 @@ export const ThemeAdminController = class {
         
         // Simulación de paginación simple sobre el array de resultados
         // (En el futuro esto lo manejará tu base de datos directamente)
-        return res.json({
-          data: themes,
-          pagination: {
-            totalDocuments: themes.length,
-            count: themes.length,
-            limit: Number(limit) || DEFAULTS.LIMIT_PAGINATION,
-            offset: Number(offset) || DEFAULTS.LIMIT_OFFSET
-          }
-        });
+        // Le pasamos el array de datos al helper y él construye todo el JSON de respuesta con la sección de pagination incluida
+        const response = formatPaginatedResponse({data: themes, totalDocuments: themes.length, limit, offset})
+        return res.json(response)
+
       } catch (error) {
         return res.status(500).json({ error: '// Error al obtener la lista completa de temáticas o error de servidor' });
       }

@@ -1,5 +1,6 @@
 import { UserService } from '../../services/user.service.js';
-import { DEFAULTS } from '../../config/index.js';
+
+import { formatPaginatedResponse } from '../../utils/pagination.helper.js'
 
   export const UserAdminController = class {
     
@@ -8,15 +9,9 @@ import { DEFAULTS } from '../../config/index.js';
       try {
         const { name, limit, offset } = req.query 
         const {users, total} = await UserService.getAllAdmin({ name, limit, offset })
-        return res.json({
-                data: users,
-                pagination: { // puede separar la pagination en un helper o función aparte si quieres, pero no es obligatorio
-                  totalDocuments: total,
-                  count: users.length,
-                  limit: Number(limit) || DEFAULTS.LIMIT_PAGINATION,
-                  offset: Number(offset) || DEFAULTS.LIMIT_OFFSET
-                }
-              });
+
+        return res.json( formatPaginatedResponse({data: users, totalDocuments: total, limit, offset}))
+
       } catch (error) {
         return res.status(500).json({ error: 'Error al obtener la lista completa o error de servidor' });
       }

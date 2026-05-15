@@ -1,5 +1,6 @@
 import { UserService} from '../../services/user.service.js';
-import { DEFAULTS } from '../../config/index.js';
+
+import { formatPaginatedResponse } from '../../utils/pagination.helper.js'
 
 export const UserClientController = class {
   static async getAll(req, res) {
@@ -9,15 +10,8 @@ export const UserClientController = class {
 
       const { users, total } = await UserService.getAll({ name, limit, offset });
 
-      return res.json({
-        data: users,
-        pagination: {
-          totalDocuments: total,
-          count: users.length,
-          limit: Number(limit) || DEFAULTS.LIMIT_PAGINATION,
-          offset: Number(offset) || DEFAULTS.LIMIT_OFFSET
-        }
-      });
+      return res.json( formatPaginatedResponse({data: users, totalDocuments: total, limit, offset}))
+      
     } catch (error) {
       return res.status(500).json({ error: 'Error al obtener usuarios' });
     }

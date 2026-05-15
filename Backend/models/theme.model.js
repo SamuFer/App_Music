@@ -1,4 +1,5 @@
-import mongoose from "mongoose";
+import mongoose from "mongoose"
+import { normalizeJson } from "../utils/model.helper.js"
 
 const themeSchema = new mongoose.Schema({
     // Necesario para saber qué día del calendario es
@@ -23,13 +24,7 @@ const themeSchema = new mongoose.Schema({
 })
 
 // Configuramos el método toJSON para transformar la salida de los documentos
-themeSchema.set('toJSON', {
-    transform: (doc, ret) => {        
-        ret.id = ret._id.toString(); // Creamos 'id' legible
-        delete ret._id; // Borramos el de MongoDB
-        delete ret.__v; // Borramos la versión interna de Mongoose
-        return ret;
-    }
-});
+// Como no necesita borrar nada extra, lo dejas vacío. Limpiará id, _id y __v solo con el helper.
+themeSchema.set('toJSON', normalizeJson())
 
 export const Theme = mongoose.model('theme', themeSchema);

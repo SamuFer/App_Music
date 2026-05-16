@@ -6,17 +6,18 @@ export const ThemeAdminController = class {
     // OBTENER TODAS LAS TEMÁTICAS CON PAGINACIÓN
     static async getAll(req, res) {
       try {
-        const { limit, offset } = req.query; 
-        const themes = await ThemeService.getAlladmin();
+        const { title, limit, offset } = req.query; 
+        const {themes, total} = await ThemeService.getAllAdmin({ title, limit, offset })
         
         // Simulación de paginación simple sobre el array de resultados
         // (En el futuro esto lo manejará tu base de datos directamente)
         // Le pasamos el array de datos al helper y él construye todo el JSON de respuesta con la sección de pagination incluida
-        const response = formatPaginatedResponse({data: themes, totalDocuments: themes.length, limit, offset})
+        const response = formatPaginatedResponse({data: themes, totalDocuments: total, limit, offset}) // [data] se utiliza cuando hay varias tematicas
         return res.json(response)
 
       } catch (error) {
-        return res.status(500).json({ error: '// Error al obtener la lista completa de temáticas o error de servidor' });
+        // Si el servicio falló, este catch evita que el servidor muera y responde con elegancia
+        return res.status(500).json({ error: `// ${error.message}` });
       }
     }
 
@@ -35,7 +36,7 @@ export const ThemeAdminController = class {
             title, 
             startDate, 
             votingDeadline,
-            status: status || 'active' 
+            status: status || 'upcoming' // Si no se proporciona un estado, se establece como 'upcoming' por defecto
           });
 
           return res.status(201).json({

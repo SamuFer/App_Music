@@ -3,4 +3,4 @@ import { ThemeClientController } from "../../../controllers/client/theme.control
 
 export const clientThemeRoutes = Router()
 
-clientThemeRoutes.get('/today', ThemeClientController.getToday) 
+clientThemeRoutes.get('/', ThemeClientController.getToday) 

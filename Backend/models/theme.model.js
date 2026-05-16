@@ -16,7 +16,7 @@ const themeSchema = new mongoose.Schema({
     status: {
         type: String,
         enum: ['upcoming', 'active', 'closed'],
-        default: 'active'
+        default: 'upcoming'
     }
 },{ 
     // Agrega automáticamente campos createdAt y updatedAt

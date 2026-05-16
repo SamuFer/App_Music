@@ -13,7 +13,7 @@ import { formatPaginatedResponse } from '../../utils/pagination.helper.js'
         return res.json( formatPaginatedResponse({data: users, totalDocuments: total, limit, offset}))
 
       } catch (error) {
-        return res.status(500).json({ error: 'Error al obtener la lista completa o error de servidor' });
+        return res.status(500).json({ error: `// ${error.message}` });
       }
     }
 
@@ -23,7 +23,7 @@ import { formatPaginatedResponse } from '../../utils/pagination.helper.js'
           const { name, email, password, role } = req.body;
 
           if (!name || !email || !password) {
-            return res.status(400).json({ error: "Nombre, email y password son obligatorios" });
+            return res.status(400).json({ error: "// Nombre, email y password son obligatorios" });
           }
 
           const newUser = await UserService.create({ 
@@ -38,7 +38,8 @@ import { formatPaginatedResponse } from '../../utils/pagination.helper.js'
             data: newUser
           });
       } catch (error) {
-          return res.status(400).json({ error: error.message });
+          // PERFECTO: Muestra el error de duplicados (ej: El usuario o el email ya están...)
+          return res.status(400).json({ error: `// ${error.message}` });
       }
     }
 
@@ -48,11 +49,11 @@ import { formatPaginatedResponse } from '../../utils/pagination.helper.js'
         const { id } = req.params;
         const user = await UserService.getById(id);
         
-        if (!user) return res.status(404).json({ error: "Usuario no encontrado" });
+        if (!user) return res.status(404).json({ error: "// Usuario no encontrado" });
         
         return res.json(user);
       } catch (error) {
-        return res.status(500).json({ error: "ID no válido o error de servidor" });
+        return res.status(500).json({ error: `// ${error.message}` });
       }
     }
 
@@ -67,11 +68,11 @@ import { formatPaginatedResponse } from '../../utils/pagination.helper.js'
 
         const updatedUser = await UserService.update(id, updateData);
 
-        if (!updatedUser) return res.status(404).json({ error: "Usuario no encontrado" });
+        if (!updatedUser) return res.status(404).json({ error: "// Usuario no encontrado" });
 
         return res.json({ message: "Actualizado correctamente", data: updatedUser });
       } catch (error) {
-        return res.status(400).json({ error: error.message });
+        return res.status(400).json({ error: `// ${error.message}` });
       }
     }
 
@@ -81,11 +82,11 @@ import { formatPaginatedResponse } from '../../utils/pagination.helper.js'
         const { id } = req.params;
         const deletedUser = await UserService.delete(id);
 
-        if (!deletedUser) return res.status(404).json({ error: "Usuario no encontrado" });
+        if (!deletedUser) return res.status(404).json({ error: "// Usuario no encontrado" });
 
         return res.json({message: `Usuario ${deletedUser.email} eliminado permanentemente`});
       } catch (error) {
-        return res.status(500).json({ error: "Error al eliminar" });
+        return res.status(500).json({ error: `// ${error.message}` });
       }
     }
 

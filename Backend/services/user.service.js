@@ -1,3 +1,4 @@
+import mongoose from 'mongoose'
 import { User } from '../models/user.model.js'
 import { DEFAULTS } from '../config/server.js'
 
@@ -9,35 +10,48 @@ export const UserService = class {
     limit = DEFAULTS.LIMIT_PAGINATION,
     offset = DEFAULTS.LIMIT_OFFSET,
   } = {}) {
-    const filter = name
-      ? { name: { $regex: name, $options: "i" } } // Búsqueda parcial e insensible a mayúsculas
-      : {};
+    // NUEVO: Agregamos try/catch para proteger la consulta paralela de Mongoose
+    try {
+      const filter = name
+        ? { name: { $regex: name, $options: "i" } } // Búsqueda parcial e insensible a mayúsculas
+        : {};
 
-    // Aquí el .select('name') es OBLIGATORIO y no negociable para proteger la privacidad de los usuarios
-    const [users, total] = await Promise.all([
-      User.find(filter)
-        .select("name")
-        .limit(Number(limit))
-        .skip(Number(offset)),
-      User.countDocuments(filter),
-    ]);
+      // Aquí el .select('name') es OBLIGATORIO y no negociable para proteger la privacidad de los usuarios
+      const [users, total] = await Promise.all([
+        User.find(filter)
+          .select("name")
+          .limit(Number(limit))
+          .skip(Number(offset)),
+        User.countDocuments(filter),
+      ]);
 
-    return { users, total };
+      return { users, total };
+
+    } catch (error) {
+        throw new Error(`Error en el servidor al obtener la lista pública de usuarios: ${error.message}`);
+    }
   }
 
   // 2. VISTA ADMIN (Acceso Total) | ADMIN METHODS
   static async getAllAdmin({ name, limit, offset } = {}) {
-    const filter = name ? { name: { $regex: name, $options: "i" } } : {};
+    // NUEVO: Agregamos try/catch para proteger la consulta pesada del administrador
+    try {
+      const filter = name ? { name: { $regex: name, $options: "i" } } : {};
 
-    // Aquí traemos todo, incluyendo email y role
-    const [users, total] = await Promise.all([
-      User.find(filter)
-        .limit(Number(limit))
-        .skip(Number(offset))
-        .sort({ createdAt: -1 }),
-      User.countDocuments(filter),
-    ]);
-    return { users, total };
+      // Aquí traemos todo, incluyendo email y role
+      const [users, total] = await Promise.all([
+        User.find(filter)
+          .limit(Number(limit))
+          .skip(Number(offset))
+          .sort({ createdAt: -1 }),
+        User.countDocuments(filter),
+      ]);
+
+      return { users, total };
+
+    } catch (error) {
+      throw new Error(`Error en el servidor al obtener la lista de usuarios para el administrador: ${error.message}`);
+    }
   }
 
   // CREAR USUARIO
@@ -53,7 +67,7 @@ export const UserService = class {
       if (error.code === 11000) {
         throw new Error("El usuario o el email ya están registrados");
       }
-      throw new Error(`Error en la base de datos: ${error.message}`);
+      throw new Error(`Error en la base de datos al crear el usuario: ${error.message}`);
     }
   }
 
@@ -65,9 +79,8 @@ export const UserService = class {
     try {
       return await User.findById(id);
     } catch (error) {
-      // Aquí solo llegan errores REALES (ej. base de datos caída)
-      console.error("Error al buscar usuario:", error);
-      throw error;
+      // MEJORADO: Cambiamos el console.error por un throw estructurado como tus otros métodos
+      throw new Error(`Error en el servidor al buscar el usuario por ID: ${error.message}`);
     }
   }
 
@@ -76,18 +89,24 @@ export const UserService = class {
     try {
       if (!mongoose.Types.ObjectId.isValid(id)) return null;
       return await User.findByIdAndUpdate(id, data, {
-        new: true,
-        runValidators: true,
+        new: true, // Devuelve el documento actualizado
+        runValidators: true, // Asegura que se apliquen las validaciones del schema en la actualización
       });
     } catch (error) {
-      throw new Error(`Error al actualizar: ${error.message}`);
+      throw new Error(`Error al actualizar el usuario: ${error.message}`);
     }
   }
 
   // 3. BORRAR USUARIO
   static async delete(id) {
     if (!mongoose.Types.ObjectId.isValid(id)) return null;
-    return await User.findByIdAndDelete(id);
+
+    // NUEVO: Agregamos try/catch para proteger la eliminación física en la base de datos
+    try {
+      return await User.findByIdAndDelete(id);
+    } catch (error) {
+      throw new Error(`Error en el servidor al intentar eliminar el usuario: ${error.message}`);
+    }
   }
 // este bloque es para unificar el getAll y getAllAdmin, pero lo dejo comentado porque no es obligatorio y a veces es más claro tener métodos separados en el servicio para cada caso, aunque compartan lógica:
   //   static async getUsers({ name, limit, offset, isAdmin = false } = {}) {

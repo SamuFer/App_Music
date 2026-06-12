@@ -6,8 +6,8 @@ export const ThemeClientController = class {
     static async getToday(req, res) {
       try {
         const activeTheme = await ThemeService.getActive();
-
-        if (!activeTheme) {
+        // CORRECCIÓN: Si es un array vacío, activeTheme.length será 0 (que es false)
+        if (!activeTheme || activeTheme.length === 0) {
           return res.status(404).json({ 
             message: '// No hay ninguna tematica activa para su votación para el día de hoy o en este momento.' 
           });

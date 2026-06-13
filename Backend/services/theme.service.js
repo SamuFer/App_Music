@@ -1,4 +1,5 @@
 import {Theme} from "../models/theme.model.js"
+import mongoose from "mongoose"
 
 export const ThemeService = class {
     // Para el Admin: Crear un nuevo tema
@@ -47,6 +48,21 @@ export const ThemeService = class {
       }).sort({ day: 1 });
     } catch (error) {
       throw new Error(`Error en el servidor al buscar la temática activa: ${error.message}`);
+    }
+  }
+
+  // NUEVO: Buscar una temática por su ID
+  static async getById(id) {
+    // 1. Si el formato del ID es de juguete o mal escrito, devolvemos null sin ir a la DB
+    if (!mongoose.isValidObjectId(id)) {
+      return null;
+    }
+
+    try {
+      // 2. Buscamos el documento por su ID único en MongoDB
+      return await Theme.findById(id); 
+    } catch (error) {
+      throw new Error(`Error en la base de datos al buscar la temática: ${error.message}`);
     }
   }
 }

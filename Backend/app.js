@@ -6,6 +6,7 @@ import { clientThemeRoutes } from './routes/v1/client/theme.routes.js'
 
 import { adminUserRoutes } from './routes/v1/admin/user.routes.js' 
 import { adminThemeRoutes } from './routes/v1/admin/theme.routes.js'
+import { adminSongRoutes } from './routes/v1/admin/song.routes.js'
 
 import { corsMiddleware } from './middlewares/cors.js'
 // import { DEFAULTS } from './config.js'
@@ -39,7 +40,7 @@ app.use('/api/v1/themes', clientThemeRoutes)
 // Las rutas de admin
 app.use('/api/v1/admin/users', adminUserRoutes)
 app.use('/api/v1/admin/themes', adminThemeRoutes)
-
+app.use('/api/v1/admin/songs', adminSongRoutes)
 // Conexion a la base de datos
 connectDB();
 

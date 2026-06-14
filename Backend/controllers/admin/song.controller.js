@@ -1,29 +1,17 @@
 import { SongService } from "../../services/song.service.js"
 import { ThemeService } from "../../services/theme.service.js"
+import { AppError } from "../../utils/customError.js"
 import mongoose from "mongoose"
 
 
 export const SongAdminController = class {
     static async create(req, res){
         try {
-
-            // 1. El themeId ahora viene de la URL (req.params)
+            // 1. Desestructuración limpia (el middleware ya validó que existen)
             const { themeId } = req.params
+            const { title, artist, spotifyTrackId, submittedBy } = req.body
 
-            // 2. El resto de datos de la canción vienen del cuerpo (req.body)
-            const {title, artist, spotifyTrackId, submittedBy} = req.body
-
-            // Validaciones de campos obligatorios antes de golpear el servicio
-            if (!themeId || !title || !artist || !spotifyTrackId) {
-                return res.status(400).json({ error: "// Faltan datos obligatorios para registrar la canción (themeId, title, artist o spotifyTrackId)." });
-            }
-
-            // Validamos que el formato del themeId sea correcto
-            if (!mongoose.isValidObjectId(themeId)) {
-                return res.status(400).json({ error: "// El ID de la temática no tiene un formato válido." });
-            }
-
-            // 4. ANIDACIÓN SEGURA: Verificamos que esa temática exista en la DB antes de colgarle la canción
+            // 2. ANIDACIÓN SEGURA: Comprobar existencia en la DB
             const themeExists = await ThemeService.getById(themeId);
             if (!themeExists) {
                 return res.status(404).json({ error: "// No puedes añadir una canción a una temática que no existe." });
@@ -34,7 +22,7 @@ export const SongAdminController = class {
                 title,
                 artist,
                 spotifyTrackId,
-                submittedBy: submittedBy || "Admin" // Si no se proporciona quién la sugirió, se establece como "Admin" por defecto
+                submittedBy: submittedBy || "Admin"
             })
 
             return res.status(201).json({
@@ -43,23 +31,29 @@ export const SongAdminController = class {
             })
 
         } catch (error) {
-            return res.status(500).json({ error: `// Error interno: ${error.message}` }); // Aquí puedes personalizar el mensaje de error según el tipo de error que quieras destacar
+            // 🔥 MAGIA: Si el error viene del AppError del servicio (ej: código 409 de duplicado), 
+            // respondemos con su código exacto. Si es otro fallo raro, cae en el 500.
+            if (error instanceof AppError) { // que hace instanceof? Comprueba si el error es una instancia de la clase AppError.
+                return res.status(error.statusCode).json({ error: `// ${error.message}` })
+            }
+            return res.status(500).json({ error: `// Error interno no controlado: ${error.message}` })
         }
     }
 
     // NUEVO: Controlador para listar TODO el catálogo
     static async getAll(req, res) {
         try {
-        const songs = await SongService.getAll();
+            const songs = await SongService.getAll();
 
-        // Al Admin le interesa saber cuántas canciones hay en total (count)
-        return res.status(200).json({
-            success: true,
-            count: songs.length,
-            data: songs // Al admin le pasamos la data cruda completa
-        });
+            // Al Admin le interesa saber cuántas canciones hay en total (count)
+            return res.status(200).json({
+                success: true,
+                count: songs.length,
+                data: songs // Al admin le pasamos la data cruda completa
+            });
         } catch (error) {
-        return res.status(500).json({ error: `// Error interno: ${error.message}` });
+            if (error instanceof AppError) return res.status(error.statusCode).json({ error: `// ${error.message}` })
+            return res.status(500).json({ error: `// Error interno: ${error.message}` })
         }
     }
 
@@ -67,35 +61,27 @@ export const SongAdminController = class {
     static async getByThemeId(req, res) {
         try {
         const { themeId } = req.params;
+        
+        // Validamos primero si existe la temática en la DB
+        const themeExists = await ThemeService.getById(themeId)
+        if (!themeExists) {
+            return res.status(404).json({ error: "// La temática especificada no existe en la Base de Datos." })
+        }
+
+        // Llamamos al nuevo método del servicio que renombramos antes
         const songs = await SongService.getById(themeId)
 
-        if (songs === null) {
-            return res.status(400).json({ error: "// El formato del ID de la temática es incorrecto." });
-        }
-
-        // Validamos si existe la temática
-        const themeExists = await ThemeService.getById(themeId); 
-        if (!themeExists) {
-            return res.status(404).json({ error: "// La temática especificada no existe en la Base de Datos." });
-        }
-
-        if (songs.length === 0) {
-            return res.status(200).json({
-                success: true,
-                count: 0,
-                message: "// Panel de Control: Esta temática está vacía. Lista para añadir canciones.",
-                data: [] // Mandamos el array vacío seco para que su panel pinte una tabla vacía con el botón "Añadir"
-            });
-        }
-
-        // El admin recibe la data cruda y completa de la DB para su gestión
-        return res.json({
+        // Respuesta unificada (si count es 0, el frontend ya sabe que está vacía y lista para llenar)
+        return res.status(200).json({
             success: true, 
             count: songs.length,
+            message: songs.length === 0 ? "// Panel de Control: Esta temática está vacía. Lista para añadir canciones." : undefined,
             data: songs 
         })
+        
         } catch (error) {
-            return res.status(500).json({ error: `// Error interno: ${error.message}` });
+            if (error instanceof AppError) return res.status(error.statusCode).json({ error: `// ${error.message}` })
+            return res.status(500).json({ error: `// Error interno: ${error.message}` })
         }
     }
 
@@ -104,33 +90,33 @@ export const SongAdminController = class {
         try {
         const { id } = req.params; // ID de la canción a borrar
 
-        const deletedSong = await SongService.delete(id);
+        // El servicio intenta borrar. Devuelve el documento eliminado si existía, o null si no.
+        const deletedSong = await SongService.delete(id)
 
-        // Escenario 1: El ID estaba mal escrito (Formato no válido)
-        if (deletedSong === null && id.length !== 24) { 
-            return res.status(400).json({ 
-            error: "// Error: El formato del ID de la canción no es válido." 
-            });
-        }
-
-        // Escenario 2: El ID tenía buen formato pero la canción ya no existía
+        // ESCENARIO único de ausencia: El ID tenía buen formato pero la canción ya no existía
         if (!deletedSong) {
             return res.status(404).json({ 
-            error: "// Error: La canción que intentas eliminar no existe en la base de datos." 
+                error: "// Error: La canción que intentas eliminar no existe en la base de datos." 
             });
         }
 
-        // Escenario 3: Eliminación exitosa
+        // ESCENARIO: Eliminación exitosa
         return res.status(200).json({
+            success: true,
             message: "// Canción eliminada correctamente del sistema.",
             deletedRecord: {
-            id: deletedSong._id,
-            title: deletedSong.title,
-            artist: deletedSong.artist
+                id: deletedSong._id,
+                title: deletedSong.title,
+                artist: deletedSong.artist
             }
-        });
+        })
+
         } catch (error) {
-        return res.status(500).json({ error: `// Error interno al eliminar: ${error.message}` });
+            // Interceptamos si el servicio lanza un AppError controlado, si no, cae en el 500
+            if (error instanceof AppError) {
+                return res.status(error.statusCode).json({ error: `// ${error.message}` })
+            }
+            return res.status(500).json({ error: `// Error interno al eliminar: ${error.message}` })
         }
     }
 }

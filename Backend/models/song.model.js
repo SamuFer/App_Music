@@ -17,6 +17,12 @@ const songSchema = new mongoose.Schema({
     timestamps: true,
 })
 
+// Candado inteligente: Evita repetir canción + artista en la misma temática
+songSchema.index({ themeId: 1, title: 1, artist: 1 }, { unique: true })
+
+// 2. 🔥 NUEVO CANDADO: Evita la misma canción exacta de Spotify en la misma temática
+songSchema.index({ themeId: 1, spotifyTrackId: 1 }, { unique: true })
+
 // Aplicamos el helper para limpiar los campos id, _id y __v al transformarlo a JSON
 songSchema.set('toJSON', normalizeJson())
 

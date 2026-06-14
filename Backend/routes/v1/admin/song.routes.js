@@ -1,5 +1,6 @@
 import { Router } from "express"
 import { SongAdminController } from "../../../controllers/admin/song.controller.js"
+import { songValidator} from "../../../middlewares/validators/song.validator.js"
 
 
 export const adminSongRoutes = Router()
@@ -7,5 +8,5 @@ export const adminSongRoutes = Router()
 adminSongRoutes.get('/', SongAdminController.getAll);
 
 // Eliminar una canción específica usando SU propio ID de canción
-adminSongRoutes.delete('/:id', SongAdminController.delete);
+adminSongRoutes.delete('/:id', songValidator, SongAdminController.delete);
 

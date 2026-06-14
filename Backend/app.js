@@ -11,6 +11,7 @@ import { adminSongRoutes } from './routes/v1/admin/song.routes.js'
 import { corsMiddleware } from './middlewares/cors.js'
 // import { DEFAULTS } from './config.js'
 import { connectDB, SERVER_CONFIG } from './config/index.js'
+import { initThemeCron } from './cron/theme.cron.js'
 
 const PORT = SERVER_CONFIG.PORT;
 const app = express()
@@ -47,7 +48,9 @@ connectDB();
 // Levantamos el servidor SOLO después de conectar a la base de datos
 if (SERVER_CONFIG.NODE_ENV !== 'production') {
   app.listen(PORT, () => {
-    console.log(`Servidor levantado en http://localhost:${PORT}`)
+    console.log(`☕ Servidor corriendo en http://localhost:${PORT}`)
+    // Iniciamos el cron para cerrar automáticamente las temáticas activas que ya caducaron
+    initThemeCron();
   })
 }
 

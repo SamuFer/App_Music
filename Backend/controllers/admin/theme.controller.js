@@ -1,5 +1,6 @@
 import { ThemeService } from "../../services/theme.service.js"
-import { DEFAULTS } from "../../config/index.js";
+import { DEFAULTS } from "../../config/index.js"
+import { AppError } from "../../utils/customError.js"
 import { formatPaginatedResponse } from "../../utils/pagination.helper.js"
 
 export const ThemeAdminController = class {
@@ -13,11 +14,15 @@ export const ThemeAdminController = class {
         // (En el futuro esto lo manejará tu base de datos directamente)
         // Le pasamos el array de datos al helper y él construye todo el JSON de respuesta con la sección de pagination incluida
         const response = formatPaginatedResponse({data: themes, totalDocuments: total, limit, offset}) // [data] se utiliza cuando hay varias tematicas
-        return res.json(response)
+        
+        return res.status(200).json(response)
 
       } catch (error) {
         // Si el servicio falló, este catch evita que el servidor muera y responde con elegancia
-        return res.status(500).json({ error: `// ${error.message}` });
+        if (error instanceof AppError) {
+            return res.status(error.statusCode).json({ error: `// ${error.message}` })
+        }
+        return res.status(500).json({ error: `// Error interno del servidor: ${error.message}` })
       }
     }
 
@@ -26,10 +31,7 @@ export const ThemeAdminController = class {
       try {
           const { day, title, startDate, votingDeadline, status } = req.body;
 
-          // Validaciones de campos obligatorios antes de golpear el servicio
-          if (!day || !title || !startDate || !votingDeadline) {
-            return res.status(400).json({ error: "// El día, título, fecha de inicio y fecha límite son obligatorios" });
-          }
+          // 💡 Las validaciones de campos obligatorios ya se hicieron en el middleware
 
           const newTheme = await ThemeService.create({ 
             day, 
@@ -40,11 +42,16 @@ export const ThemeAdminController = class {
           });
 
           return res.status(201).json({
+            success: true,
             message: "Temática creada exitosamente por el administrador",
             data: newTheme
           });
       } catch (error) {
-          return res.status(400).json({ error: `// ${error.message}` }); // Aquí puedes personalizar el mensaje de error según el tipo de error que quieras destacar
+          // 🔥 Si el servicio lanza el error 409 por día duplicado, aquí se responde correctamente
+          if (error instanceof AppError) {
+              return res.status(error.statusCode).json({ error: `// ${error.message}` });
+          }
+          return res.status(500).json({ error: `// Error interno al crear temática: ${error.message}` })
       }
     }
 }

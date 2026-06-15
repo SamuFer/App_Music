@@ -1,4 +1,5 @@
-import { ThemeService } from "../../services/theme.service.js";
+import { ThemeService } from "../../services/theme.service.js"
+import { AppError } from "../../utils/customError.js"
 
 export const ThemeClientController = class {
     
@@ -6,26 +7,37 @@ export const ThemeClientController = class {
     static async getToday(req, res) {
       try {
         const activeTheme = await ThemeService.getActive();
-        // CORRECCIÓN: Si es un array vacío, activeTheme.length será 0 (que es false)
+        // Si es un array vacío o null, significa que no hay temáticas activas en este rango de fechas
         if (!activeTheme || activeTheme.length === 0) {
           return res.status(404).json({ 
+            suscess: false,
             message: '// No hay ninguna tematica activa para su votación para el día de hoy o en este momento.' 
           });
         }
-        // Limpiamos cada temática del array usando .map()
+
+        // Limpiamos cada temática del array usando .map() para enviar solo lo justo
         const cleanedThemes = activeTheme.map(theme => ({
           id: theme.id,
           day: theme.day,
           title: theme.title,
           votingDeadline: theme.votingDeadline
-        }));
-        return res.json({
+        }))
+
+        return res.status(200).json({
+          success: true,
           data: cleanedThemes
-        });
+        })
+
       } catch (error) {
-        // PROTECCIÓN CLIENTE: Ignoramos el error.message real de la DB por seguridad
-        // y devolvemos un mensaje genérico fijo que no expone datos del servidor.
-        return res.status(500).json({ error: '// Ocurrió un error al cargar la temática del día. Por favor, intenta más tarde.' });
+       // Si el error es una instancia de AppError, respondemos con su código exacto
+        if (error instanceof AppError) {
+            return res.status(error.statusCode).json({ error: `// ${error.message}` })
+        }
+
+        // PROTECCIÓN CLIENTE: Si es un error desconocido de la DB, enviamos tu mensaje seguro
+        return res.status(500).json({ 
+            error: '// Ocurrió un error al cargar la temática del día. Por favor, intenta más tarde.' 
+        })
       }
     }
 }

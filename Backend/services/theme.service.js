@@ -1,21 +1,21 @@
 import {Theme} from "../models/theme.model.js"
-import mongoose from "mongoose"
+import { AppError } from "../utils/customError.js"
 
 export const ThemeService = class {
     // Para el Admin: Crear un nuevo tema
     static async create(input) {
-    try {
-      // Combina la simplicidad de create con el control de errores
-      return await Theme.create(input)
-    } catch (error) {
-      if (error.code === 11000) { // Código de error de MongoDB para duplicados (esto ocurre si intentas crear un tema con un "day" que ya existe, por ejemplo) 
-        throw new Error("El [day] del tema ya está registrado porque debe ser un valor único. Por favor, elige otro número de día.");
+      try {
+        return await Theme.create(input);
+      } catch (error) {
+        // Código de error de MongoDB para duplicados (en este caso, el campo único "day")
+        if (error.code === 11000) { 
+          throw new AppError("El [day] del tema ya está registrado porque debe ser un valor único. Por favor, elige otro número de día.", 409);
+        }
+        throw new AppError(`Error en el servidor al crear el tema: ${error.message}`, 500);
       }
-      throw new Error(`Error en el servidor al crear el tema: ${error.message}`);
     }
-  }
 
-  // Para el Admin: Listar todos los temas ordenados por día
+  // Para el Admin: Listar todos los temas ordenados por día (Paginados y Filtrados)
   static async getAllAdmin({ title, limit, offset } = {}) {
      try {
       const filter = title ? { title: { $regex: title, $options: "i" } } : {};
@@ -27,12 +27,13 @@ export const ThemeService = class {
           .skip(Number(offset))
           .sort({ createdAt: -1 }),
         Theme.countDocuments(filter),
-      ]);
+      ])
+
       return { themes, total }
       
     } catch (error) {
       // Atrapamos el error de la DB y lo lanzamos con un texto claro
-      throw new Error(`Error en el servidor al obtener las temáticas: ${error.message}`);
+      throw new AppError(`Error en el servidor al obtener las temáticas: ${error.message}`, 500)
     }
   }
 
@@ -47,22 +48,18 @@ export const ThemeService = class {
         votingDeadline: { $gte: now } // El tema aún no ha cerrado para votación y $gte es "mayor o igual que" y now es la fecha actual ( now tiene que ser menor o igual a votingDeadline para que el tema esté activo)
       }).sort({ day: 1 })
     } catch (error) {
-      throw new Error(`Error en el servidor al buscar la temática activa: ${error.message}`);
+      throw new AppError(`Error en el servidor al buscar la temática activa: ${error.message}`, 500)
     }
   }
 
   // NUEVO: Buscar una temática por su ID
   static async getById(id) {
-    // 1. Si el formato del ID es de juguete o mal escrito, devolvemos null sin ir a la DB
-    if (!mongoose.isValidObjectId(id)) {
-      return null
-    }
-
+    // 💡 NOTA: Quitamos el "if (!isValidObjectId)" manual porque el middleware lo frenará en la puerta.
     try {
-      // 2. Buscamos el documento por su ID único en MongoDB
+      // Buscamos el documento por su ID único en MongoDB
       return await Theme.findById(id) 
     } catch (error) {
-      throw new Error(`Error en la base de datos al buscar la temática: ${error.message}`)
+      throw new AppError(`Error en la base de datos al buscar la temática: ${error.message}`, 500)
     }
   }
 
@@ -97,7 +94,7 @@ export const ThemeService = class {
         nextTheme: nextTheme // Enviamos el documento entero (o null si no había)
       }
     } catch (error) {
-      throw new Error(`Error en el automatizador de temáticas: ${error.message}`);
+      throw new AppError(`Error en el automatizador de temáticas: ${error.message}`, 500)
     }
   }
 

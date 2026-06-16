@@ -1,6 +1,7 @@
 import mongoose from 'mongoose'
 import { User } from '../models/user.model.js'
 import { DEFAULTS } from '../config/server.js'
+import {AppError} from '../utils/customError.js'
 
 
 export const UserService = class {
@@ -28,7 +29,7 @@ export const UserService = class {
       return { users, total };
 
     } catch (error) {
-        throw new Error(`Error en el servidor al obtener la lista pública de usuarios: ${error.message}`);
+        throw new AppError(`Error en el servidor al obtener la lista pública de usuarios: ${error.message}`, 500)
     }
   }
 
@@ -50,7 +51,7 @@ export const UserService = class {
       return { users, total };
 
     } catch (error) {
-      throw new Error(`Error en el servidor al obtener la lista de usuarios para el administrador: ${error.message}`);
+      throw new AppError(`Error en el servidor al obtener la lista de usuarios para el administrador: ${error.message}`, 500)
     }
   }
 
@@ -58,54 +59,53 @@ export const UserService = class {
   static async create(input) {
     try {
       // Creamos la instancia con los datos del input
-      const user = new User(input);
+      const user = new User(input)
 
       // .save() activará las validaciones de tu Schema (required, enum, etc.)
-      return await user.save();
+      return await user.save()
+
     } catch (error) {
-      // Si el error es código 11000, es porque el email o username ya existen
+      // Si el error es código 11000, es por duplicado (Llave única: email o username)
       if (error.code === 11000) {
-        throw new Error("El usuario o el email ya están registrados");
+        throw new AppError("El nombre de usuario o el correo electrónico ya están registrados en el sistema.", 409)
       }
-      throw new Error(`Error en la base de datos al crear el usuario: ${error.message}`);
+      throw new AppError(`Error en la base de datos al crear el usuario: ${error.message}`, 500)
     }
   }
 
   // Obtener por ID
   static async getById(id) {
-    // Validación rápida: no consume recursos de DB ni lanza excepciones
-    if (!mongoose.isValidObjectId(id)) return null;
-
+    // 💡 NOTA: Quitamos el "isValidObjectId" manual porque el middleware lo interceptará antes
     try {
       return await User.findById(id);
     } catch (error) {
       // MEJORADO: Cambiamos el console.error por un throw estructurado como tus otros métodos
-      throw new Error(`Error en el servidor al buscar el usuario por ID: ${error.message}`);
+      throw new AppError(`Error en el servidor al buscar el usuario por ID: ${error.message}`, 500)
     }
   }
 
   // 2.ACTUALIZAR USUARIO
   static async update(id, data) {
     try {
-      if (!mongoose.Types.ObjectId.isValid(id)) return null;
+      // Si el Admin intenta actualizar un email/username a uno que ya existe, saltará el error 11000
       return await User.findByIdAndUpdate(id, data, {
         new: true, // Devuelve el documento actualizado
         runValidators: true, // Asegura que se apliquen las validaciones del schema en la actualización
-      });
+      })
     } catch (error) {
-      throw new Error(`Error al actualizar el usuario: ${error.message}`);
+      if (error.code === 11000) {
+        throw new AppError("No se puede actualizar: El nombre de usuario o el correo ya están en uso.", 409)
+      }
+      throw new AppError(`Error al actualizar el usuario: ${error.message}`, 500)
     }
   }
 
   // 3. BORRAR USUARIO
   static async delete(id) {
-    if (!mongoose.Types.ObjectId.isValid(id)) return null;
-
-    // NUEVO: Agregamos try/catch para proteger la eliminación física en la base de datos
     try {
       return await User.findByIdAndDelete(id);
     } catch (error) {
-      throw new Error(`Error en el servidor al intentar eliminar el usuario: ${error.message}`);
+      throw new AppError(`Error en el servidor al intentar eliminar el usuario: ${error.message}`, 500)
     }
   }
 // este bloque es para unificar el getAll y getAllAdmin, pero lo dejo comentado porque no es obligatorio y a veces es más claro tener métodos separados en el servicio para cada caso, aunque compartan lógica:

@@ -1,19 +1,26 @@
 import { UserService} from '../../services/user.service.js';
-
+import {AppError} from '../../utils/customError.js'
 import { formatPaginatedResponse } from '../../utils/pagination.helper.js'
 
 export const UserClientController = class {
   static async getAll(req, res) {
     try {
      
-      const { name, limit, offset } = req.query;
+      const { name, limit, offset } = req.query
 
-      const { users, total } = await UserService.getAll({ name, limit, offset });
+      const { users, total } = await UserService.getAll({ name, limit, offset })
 
-      return res.json( formatPaginatedResponse({data: users, totalDocuments: total, limit, offset}))
+      const response = formatPaginatedResponse({ data: users, totalDocuments: total, limit, offset })
+      return res.status(200).json(response)
       
     } catch (error) {
-      return res.status(500).json({ error: 'Error al obtener usuarios' });
+      // Si el error es una instancia de AppError, respondemos con su código exacto
+      if (error instanceof AppError) {
+          return res.status(error.statusCode).json({ error: `// ${error.message}` });
+      }
+
+      // PROTECCIÓN CLIENTE: Mensaje genérico seguro si explota la base de datos de manera imprevista
+      return res.status(500).json({ error: '// Error al obtener la lista de participantes.' })
     }
   }
 

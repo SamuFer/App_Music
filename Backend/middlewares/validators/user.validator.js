@@ -13,12 +13,12 @@ export const userValidatorRequest = (req, res, next) => {
 
     // 2. Solo si el método es POST (creación de usuario), validamos los campos del Body
     if (req.method === "POST") {
-        const { username, email, name } = req.body || {}
+        const { email, name, password } = req.body || {}
 
         // Validamos que existan los datos mínimos esenciales requeridos por el modelo
-        if (!username || !email || !name) {
+        if (!email || !name || !password) {
             return res.status(400).json({ 
-                error: "// Error: Faltan datos obligatorios para registrar al usuario (username, email y name)." 
+                error: "// Error: Faltan datos obligatorios para registrar al usuario (name, email y password)." 
             })
         }
         

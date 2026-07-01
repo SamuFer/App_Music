@@ -12,6 +12,7 @@ export const adminThemeRoutes = Router()
 
 adminThemeRoutes.get('/', ThemeAdminController.getAll)
 adminThemeRoutes.post('/', themeValidator, ThemeAdminController.create)
+adminThemeRoutes.delete('/:id', themeValidator, ThemeAdminController.delete)
 
 adminThemeRoutes.get('/:themeId/songs', songValidator, SongAdminController.getByThemeId)
 adminThemeRoutes.post('/:themeId/songs', songValidator, SongAdminController.create)

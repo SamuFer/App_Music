@@ -13,8 +13,10 @@ export async function apiFetch(endpoint, options = {}) {
 
   if (!response.ok) {
     // Si el backend envía un mensaje de error, lo lanzamos
-    const errorData = await response.json().catch(() => ({}));
-    throw new Error(errorData.message || 'Error en la petición al servidor');
+    const errorData = await response.json().catch(() => ({}))
+    const finalErrorMessage = errorData.error || errorData.message || 'Error en la petición al servidor'
+  
+    throw new Error(finalErrorMessage)
   }
 
   // Si no hay contenido (como en un DELETE), devolvemos null

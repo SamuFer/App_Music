@@ -54,4 +54,23 @@ export const ThemeAdminController = class {
           return res.status(500).json({ error: `// Error interno al crear temática: ${error.message}` })
       }
     }
+
+  // ELIMINAR UNA TEMÁTICA
+  static async delete(req, res) {
+    try {
+      const { id } = req.params;
+      await ThemeService.delete(id)
+
+      return res.status(200).json({
+        success: true,
+        message: "Temática eliminada exitosamente por el administrador"
+      });
+    } catch (error) {
+      if (error instanceof AppError) {
+          return res.status(error.statusCode).json({ error: `// ${error.message}` });
+      }
+      return res.status(500).json({ error: `// Error interno al eliminar temática: ${error.message}` })
+    }
+  }
+
 }

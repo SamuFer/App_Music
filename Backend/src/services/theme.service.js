@@ -37,6 +37,20 @@ export const ThemeService = class {
     }
   }
 
+  // Para el Admin: Eliminar una temática por su ID
+  static async delete(id) {
+    try {
+      const deletedTheme = await Theme.findByIdAndDelete(id);
+      if (!deletedTheme) {
+        throw new AppError("La temática que intentas eliminar no existe.", 404)
+      }
+      return deletedTheme;
+    } catch (error) {
+      if (error instanceof AppError) throw error;
+      throw new AppError(`Error en el servidor al eliminar la temática: ${error.message}`, 500)
+    }
+  }
+
   // Para el Cliente: Buscar el tema que está activo hoy según rango de fechas y estado
   static async getActive() {
     try {

@@ -15,7 +15,7 @@ export default function Layout() {
 
       {/* Contenido Principal */}
       <main className="flex-1 p-10">
-        <div className="max-w-5xl mx-auto bg-white p-8 rounded-xl shadow-sm">
+        <div className="max-w-6xl mx-auto bg-white p-8 rounded-xl shadow-sm">
           <Outlet />{/* <-- Aquí es donde se renderizará cada página */}
         </div>
       </main>

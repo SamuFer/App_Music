@@ -145,39 +145,83 @@ export default function ThemesPage() {
           ) : (
             <div className="grid gap-4">
               {themes.map((theme) => (
-                <div key={theme._id} className="bg-white border border-slate-200 p-5 rounded-[1.5rem] flex flex-col md:flex-row items-center gap-6 hover:shadow-md transition-all group">
+                <div key={theme._id} className="bg-white border border-slate-200 p-5 rounded-[1.5rem] flex flex-col md:flex-row items-center gap-6 hover:shadow-md transition-all group relative">
                   
-                  {/* Día usando la propiedad 'day' de tu modelo */}
-                  <div className={`w-16 h-16 rounded-2xl flex flex-col items-center justify-center border-2 
-                    ${theme.status === 'active' ? 'border-pink-500 bg-pink-50 text-pink-600' : theme.status === 'upcoming' ? 'border-blue-400 bg-blue-50 text-blue-400' : 'border-slate-100 bg-slate-50 text-slate-400'}`}>
-                    <span className="text-[10px] font-black uppercase">Día</span>
+                  {/* Indicador de Día */}
+                  <div className={`w-16 h-16 rounded-2xl flex flex-col items-center justify-center border-2 shrink-0
+                    ${theme.status === 'active' ? 'border-pink-500 bg-pink-50 text-pink-600' : theme.status === 'upcoming' ? 'border-blue-400 bg-blue-50 text-blue-400' : 'border-slate-200 bg-slate-50 text-slate-400'}`}>
+                    <span className="text-[10px] font-black uppercase tracking-wider">Día</span>
                     <span className="text-2xl font-black">{theme.day}</span>
                   </div>
 
-                  {/* Info */}
-                  <div className="flex-1 text-center md:text-left">
-                    <div className="flex items-center justify-center md:justify-start gap-2 mb-1">
-                      <h3 className="font-bold text-slate-900 text-lg uppercase tracking-tight">{theme.title}</h3>
+                  {/* Info Principal + BADGES DE ESTADO (UX Mejorada) */}
+                  <div className="flex-1 text-center md:text-left space-y-1.5">
+                    <div className="flex flex-col sm:flex-row items-center justify-center md:justify-start gap-2">
+                      <h4 className="font-bold text-slate-900 text-mx uppercase tracking-tight line-clamp-2 overflow-hidden">{theme.title}</h4>  {/* line-clamp-2 overflow-hidden: limita el número de líneas y oculta el exceso */}
+                      
+                      {/* Renderizado dinámico de Badges de Texto Claros */}
                       {theme.status === 'active' && (
-                        <span className="flex h-2 w-2 rounded-full bg-pink-500 animate-pulse"></span>
+                        <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[9px] font-black uppercase tracking-wider bg-pink-100 text-pink-700 border border-pink-200 animate-pulse">
+                          <span className="h-1.5 w-1.5 rounded-full bg-pink-600"></span>
+                          Activa
+                        </span>
+                      )}
+                      {theme.status === 'upcoming' && (
+                        <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[9px] font-black uppercase tracking-wider bg-blue-100 text-blue-700 border border-blue-200">
+                          <span className="h-1.5 w-1.5 rounded-full bg-blue-500"></span>
+                          Programada
+                        </span>
+                      )}
+                      {theme.status === 'closed' && (
+                        <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[9px] font-black uppercase tracking-wider bg-slate-100 text-slate-600 border border-slate-200">
+                          Finalizada
+                        </span>
                       )}
                     </div>
-                    <p className="text-slate-400 text-sm font-medium">
-                      Estado actual: <span className="text-slate-600 capitalize">{theme.status}</span>
-                    </p>
+                    {/* <p className="text-slate-400 text-sm font-medium">
+                      Estado actual: <span className="text-slate-600 capitalize font-semibold">{theme.status}</span>
+                    </p> */}
                   </div>
 
-                  {/* Acciones */}
-                  <div className="flex gap-2 opacity-0 group-hover:opacity-100 transition-all">
-                    <button 
-                      onClick={() => deleteTheme(theme._id)}
-                      className="p-2 hover:bg-red-50 rounded-lg text-slate-300 hover:text-red-500 cursor-pointer"
-                    >
-                      🗑
-                    </button>
+                  {/* Estadísticas */}
+                  <div className="flex gap-8 px-6 border-l border-slate-100 hidden sm:flex shrink-0">
+                    <div className="text-center">
+                      <span className="block text-[10px] font-bold text-slate-400 uppercase tracking-wider">Votos</span>
+                      <span className="text-lg font-black text-slate-700">{theme.votesCount || 0}</span>
+                    </div>
+                    <div className="text-center">
+                      <span className="block text-[10px] font-bold text-slate-400 uppercase tracking-wider">Puntaje</span>
+                      <span className="text-lg font-black text-indigo-600">
+                        {theme.averageScore ? theme.averageScore.toFixed(1) : '—'}
+                      </span>
+                    </div>
                   </div>
+
+                  {/* BOTÓN DE AUDITORÍA VISIBLE (UX Mejorada) + ACCIONES */}
+                  <div className="flex items-center gap-3 shrink-0 self-center md:self-auto">
+                    {/* Botón de Auditoría siempre visible si la jornada no está vacía */}
+                    <button 
+                      onClick={() => console.log(`Auditar jornada: ${theme._id}`)}
+                      className="px-3 py-1.5 bg-slate-50 hover:bg-indigo-50 border border-slate-200 hover:border-indigo-200 rounded-xl text-xs font-bold text-slate-600 hover:text-indigo-600 transition-all cursor-pointer flex items-center gap-1 shadow-sm"
+                    >
+                      📊 <span className="hidden lg:inline">Auditar Votos</span>
+                    </button>
+
+                    {/* Acciones Secundarias (Editar/Borrar) se muestran sutilmente */}
+                    <div className="flex gap-1 md:opacity-0 group-hover:opacity-100 transition-all">
+                      <button 
+                        onClick={() => deleteTheme(theme._id)}
+                        className="p-2 hover:bg-red-50 rounded-xl text-slate-300 hover:text-red-500 transition-colors cursor-pointer"
+                        title="Eliminar Temática"
+                      >
+                        🗑
+                      </button>
+                    </div>
+                  </div>
+
                 </div>
               ))}
+
             </div>
           )}
         </main>

@@ -1,5 +1,7 @@
 import { VoteService } from "../../services/vote.service.js"
 import { Vote } from "../../models/vote.model.js"
+import { User } from "../../models/user.model.js"
+import { Theme } from "../../models/theme.model.js"
 import { AppError } from "../../utils/customError.js"
 
 export const VoteAdminController = class {
@@ -80,26 +82,62 @@ export const VoteAdminController = class {
     // 5.ESTADÍSTICAS GLOBALES DEL DASHBOARD (Solo para el Admin)
     static async getGlobalStats(req, res) {
         try {
-        // Hacemos consultas paralelas rápidas para armar un Dashboard de administración
-        const [totalVotes, votesByTheme] = await Promise.all([
-            Vote.countDocuments(), // Total de votos históricos en la app
+            // Hacemos consultas paralelas rápidas para no bloquear la base de datos
+            const [totalVotes, totalUsers, totalThemes, votesByTheme] = await Promise.all([
+                Vote.countDocuments(), // Total de votos históricos
+                User.countDocuments(), // RECUENTO NUEVO: Cuántos usuarios se han registrado
+                Theme.countDocuments(), // RECUENTO NUEVO: Cuántas jornadas/temáticas se han creado en total
             
-            // Agregación para ver cuántos votos totales tuvo cada temática
-            Vote.aggregate([
-            { $group: { _id: "$themeId", globalAverageScore: { $avg: "$score" }, totalVotes: { $sum: 1 } } },
-            { $sort: { totalVotes: -1 } }
+                // Agregación para ver cuántos votos totales tuvo cada temática
+                Vote.aggregate([
+                        { 
+                            $group: { 
+                            _id: "$themeId", 
+                            globalAverageScore: { $avg: "$score" }, 
+                            totalVotes: { $sum: 1 } 
+                            } 
+                        },
+                        // 1. Unimos con la colección de Temáticas (asegúrate de que el nombre de la colección en tu Mongo sea 'themes')
+                        {
+                            $lookup: {
+                                from: "themes",         // Nombre exacto de la colección en la base de datos
+                                localField: "_id",      // El themeId por el que agrupamos antes
+                                foreignField: "_id",    // El ID principal de la temática
+                                as: "themeInfo"         // Dónde se guardará el resultado (devuelve un array)
+                            }
+                        },
+                        // 2. Desestructuramos el array que nos devuelve el lookup para transformarlo en un objeto directo
+                        { $unwind: "$themeInfo" },
+                        // 3. Proyectamos (limpiamos) los datos para enviar solo lo que el frontend necesita
+                        {
+                            $project: {
+                                _id: 1, // 1 es igual a true, 0 es false. Mantenemos el ID de la temática
+                                totalVotes: 1,
+                                globalAverageScore: 1,
+                                themeTitle: "$themeInfo.title", // 👈 ¡Mágicamente extraemos el Título!
+                                themeDay: "$themeInfo.day"      // 👈 ¡Y el número de día!
+                            }
+                        },
+                        // 4. Lo ordenamos por mayor participación
+                        { $sort: { totalVotes: -1 } }
+                ])
             ])
-        ]);
 
-        return res.status(200).json({
+            // Cálculo de engagement: Promedio de votos que deja cada usuario registrado
+            const engagementRatio = totalUsers > 0 ? (totalVotes / totalUsers).toFixed(1) : 0
+
+            return res.status(200).json({
             success: true,
             data: {
-            totalHistoricalVotes: totalVotes,
-            rankingThemesByParticipation: votesByTheme
+                totalHistoricalVotes: totalVotes,
+                totalRegisteredUsers: totalUsers,
+                totalCreatedThemes: totalThemes,
+                votesPerUserRatio: engagementRatio,
+                rankingThemesByParticipation: votesByTheme
             }
-        });
+            })
         } catch (error) {
-        return res.status(500).json({ error: `// Error al generar estadísticas globales: ${error.message}` });
+            return res.status(500).json({ error: `// Error al generar estadísticas globales: ${error.message}` })
         }
     }
 

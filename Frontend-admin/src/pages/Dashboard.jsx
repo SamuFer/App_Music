@@ -102,7 +102,7 @@ export default function Dashboard() {
               {/* Cuerpo actualizado */}
               <tbody className="divide-y divide-slate-100 text-sm font-medium text-slate-700">
                 {rankingThemes.map((item, index) => (
-                  <tr key={item._id} className="hover:bg-slate-50/80 transition-colors">
+                  <tr key={item.id} className="hover:bg-slate-50/80 transition-colors">
                     <td className="py-4 px-6">
                       <div className="flex items-center gap-3">
                         <span className="font-bold text-slate-400 text-xs w-5">#{index + 1}</span>

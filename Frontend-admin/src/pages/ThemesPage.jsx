@@ -145,7 +145,7 @@ export default function ThemesPage() {
           ) : (
             <div className="grid gap-4">
               {themes.map((theme) => (
-                <div key={theme._id} className="bg-white border border-slate-200 p-5 rounded-[1.5rem] flex flex-col md:flex-row items-center gap-6 hover:shadow-md transition-all group relative">
+                <div key={theme.id} className="bg-white border border-slate-200 p-5 rounded-[1.5rem] flex flex-col md:flex-row items-center gap-6 hover:shadow-md transition-all group relative">
                   
                   {/* Indicador de Día */}
                   <div className={`w-16 h-16 rounded-2xl flex flex-col items-center justify-center border-2 shrink-0
@@ -201,7 +201,7 @@ export default function ThemesPage() {
                   <div className="flex items-center gap-3 shrink-0 self-center md:self-auto">
                     {/* Botón de Auditoría siempre visible si la jornada no está vacía */}
                     <button 
-                      onClick={() => console.log(`Auditar jornada: ${theme._id}`)}
+                      onClick={() => console.log(`Auditar jornada: ${theme.id}`)}
                       className="px-3 py-1.5 bg-slate-50 hover:bg-indigo-50 border border-slate-200 hover:border-indigo-200 rounded-xl text-xs font-bold text-slate-600 hover:text-indigo-600 transition-all cursor-pointer flex items-center gap-1 shadow-sm"
                     >
                       📊 <span className="hidden lg:inline">Auditar Votos</span>
@@ -210,7 +210,7 @@ export default function ThemesPage() {
                     {/* Acciones Secundarias (Editar/Borrar) se muestran sutilmente */}
                     <div className="flex gap-1 md:opacity-0 group-hover:opacity-100 transition-all">
                       <button 
-                        onClick={() => deleteTheme(theme._id)}
+                        onClick={() => deleteTheme(theme.id)}
                         className="p-2 hover:bg-red-50 rounded-xl text-slate-300 hover:text-red-500 transition-colors cursor-pointer"
                         title="Eliminar Temática"
                       >

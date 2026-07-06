@@ -10,6 +10,7 @@ export default function Layout() {
           <Link to="/" className="block p-2 hover:bg-slate-700 rounded transition">🏠 Dashboard</Link>
           <Link to="/users" className="block p-2 hover:bg-slate-700 rounded transition">👤 CRUD Usuarios</Link>
           <Link to="/themes" className="block p-2 hover:bg-slate-700 rounded transition">🎵 Themes</Link>
+          <Link to="/songs" className="block p-2 hover:bg-slate-700 rounded transition">🎵 Canciones</Link>
         </nav>
       </aside>
 

@@ -62,9 +62,9 @@ export const SpotifyService = class {
       return data.tracks.items.map(track => ({
         id: track.id, 
         title: track.name,
-        artist: track.artists.map(artist => artist.name).join(", "),
-        album: track.album.name,
-        image: track.album.images[2]?.url || track.album.images[0]?.url 
+        artist: track.artists.map(artist => artist.name).join(", ") || "sin artista",
+        album: track.album.name || "sin album",
+        image: track.album.images[2]?.url || track.album.images[0]?.url || "" 
       }));
 
     } catch (error) {

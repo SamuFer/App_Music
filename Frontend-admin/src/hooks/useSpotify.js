@@ -9,10 +9,11 @@ export function useSpotify() {
   const [error, setError] = useState(null)
 
   useEffect(() => {
-    // Si el usuario borra el buscador, limpiamos las canciones y el error inmediatamente
+    // 🛠️ FIX: Si se borra el buscador, apagamos también 'loading' a false
     if (!query || query.trim() === '') {
       setTracks([])
       setError(null)
+      setLoading(false) // <- Crucial para evitar estados fantasma
       return
     }
 

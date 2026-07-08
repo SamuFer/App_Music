@@ -9,6 +9,7 @@ import { useSpotify } from '../hooks/useSpotify';
 export default function SongsPage() {
   const { themes, isLoading: loadingThemes } = useThemes();
   const [selectedThemeId, setSelectedThemeId] = useState('');
+  const [isFocused, setIsFocused] = useState(false);
   
   const { 
     songs, 
@@ -111,17 +112,25 @@ export default function SongsPage() {
                 </div>
 
                 {/* 🔍 CONTROL INTEGRADO DE BUSQUEDA EN SPOTIFY */}
+
                 <div className="space-y-1 relative">
                   <label className="text-[10px] font-black text-indigo-400 uppercase ml-1">Buscador Inteligente Spotify</label>
                   <input
                     type="text"
                     value={query}
+                    //  CÓDIGO OPTIMIZADO (Más limpio)
                     onChange={(e) => setQuery(e.target.value)}
+                    onFocus={() => setIsFocused(true)} // 💡 Detecta cuando entras al buscador
+                    onBlur={() => {
+                      // Usamos un pequeño retraso para que le dé tiempo a registrar el clic en la lista antes de cerrarse
+                      setTimeout(() => setIsFocused(false), 200); 
+                    }}
                     placeholder="🔍 Escribe título o artista..."
                     className="w-full bg-slate-800 border-none rounded-xl p-3 text-white focus:ring-2 focus:ring-indigo-500 text-sm placeholder:text-slate-500"
                   />
                   
-                  {loadingSpotify && (
+                  {/* 🛠️ FIX: Solo muestra el cargando si realmente hay texto escrito en el query */}
+                  {loadingSpotify && query.trim() !== '' && (
                     <p className="text-[11px] text-slate-400 animate-pulse ml-1">Buscando en la API...</p>
                   )}
 
@@ -129,41 +138,44 @@ export default function SongsPage() {
                     <p className="text-[11px] text-red-400 ml-1 font-semibold">{errorSpotify}</p>
                   )}
 
-                  {/* 📋 MENÚ DESPLEGABLE DE RESULTADOS */}
-                  {tracks.length > 0 && (
-                    <ul className="absolute top-[100%] left-0 right-0 bg-slate-800 border border-slate-700 rounded-xl mt-1 shadow-2xl overflow-hidden z-50 max-h-60 overflow-y-auto divided-y divide-slate-700">
+                  {/* 📋 MENÚ DESPLEGABLE DE RESULTADOS (Solo se muestra si está enfocado y hay canciones) */}
+                  {isFocused && tracks.length > 0 && (
+                    <ul className="absolute top-[100%] left-0 right-0 bg-slate-800 border border-slate-700 rounded-xl mt-1 shadow-2xl overflow-hidden z-50 max-h-60 overflow-y-auto divide-y divide-slate-700">
                       {tracks.map((track) => (
                         <li
                           key={track.id}
                           onClick={() => manejarSeleccionTrack(track)}
-                          className="flex items-center gap-3 p-2.5 hover:bg-slate-700/60 transition-colors cursor-pointer text-left"
+                          className="flex items-center gap-3 p-2.5 hover:bg-slate-700/60 transition-colors cursor-pointer text-left group/item"
                         >
-                          {track.image && (
-                            <img 
-                              src={track.image} 
-                              alt={track.album} 
-                              className="w-9 h-9 rounded-lg shrink-0 object-cover" 
-                            />
-                          )}
+                          <div className="relative w-10 h-10 shrink-0 rounded-lg overflow-hidden bg-slate-900 flex items-center justify-center">
+                            {track.image && (
+                              <img 
+                                src={track.image} 
+                                alt={track.album} 
+                                className="w-full h-full object-cover" 
+                              />
+                            )}
+                          </div>
+
                           <div className="flex-1 min-w-0">
                             <p className="text-xs font-bold truncate text-slate-100">{track.title}</p>
                             <p className="text-[11px] text-slate-400 truncate">{track.artist}</p>
                           </div>
-                          <span className="text-[10px] bg-emerald-500/10 text-emerald-400 px-2 py-1 rounded-md font-extrabold uppercase tracking-wide shrink-0">
-                            Ok
+
+                          <span className="text-[10px] bg-indigo-500/10 text-indigo-400 group-hover/item:bg-emerald-500/20 group-hover/item:text-emerald-400 px-2 py-1 rounded-md font-extrabold uppercase tracking-wide shrink-0 transition-colors">
+                            Seleccionar
                           </span>
                         </li>
                       ))}
                     </ul>
                   )}
 
-                  {/* CASO: NO ENCUENTRA MÚSICA EN SPOTIFY */}
-                  {/* CASO: NO ENCUENTRA MÚSICA EN SPOTIFY (Solo si ya NO está cargando y el array está realmente vacío) */}
-                  {query && !loadingSpotify && tracks && tracks.length === 0 && !errorSpotify && (
+                  {/* 🛠️ FIX: Añadimos query.trim().length >= 3 para que no parpadee al empezar a escribir */}
+                  {/* {query.trim().length >= 3 && !loadingSpotify && tracks && tracks.length === 0 && !errorSpotify && (
                     <p className="text-[11px] text-amber-400 ml-1 italic">
-                      // No se encontraron coincidencias en Spotify. Puedes rellenar abajo manualmente.
+                      No se encontraron coincidencias en Spotify. Puedes rellenar abajo manualmente.
                     </p>
-                  )}
+                  )} */}
                 </div>
 
                 <div className="border-t border-slate-800 my-2" />

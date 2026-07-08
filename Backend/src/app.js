@@ -8,6 +8,7 @@ import { adminUserRoutes } from './routes/v1/admin/user.routes.js'
 import { adminThemeRoutes } from './routes/v1/admin/theme.routes.js'
 import { adminSongRoutes } from './routes/v1/admin/song.routes.js'
 import { adminVoteRoutes } from './routes/v1/admin/vote.routes.js'
+import { adminSpotifyRoutes } from './routes/v1/admin/spotify.routes.js'
 
 import { corsMiddleware } from './middlewares/cors.js'
 // import { DEFAULTS } from './config.js'
@@ -44,6 +45,7 @@ app.use('/api/v1/admin/users', adminUserRoutes)
 app.use('/api/v1/admin/themes', adminThemeRoutes)
 app.use('/api/v1/admin/songs', adminSongRoutes)
 app.use('/api/v1/admin/votes', adminVoteRoutes)
+app.use('/api/v1/admin/spotify', adminSpotifyRoutes)
 // Conexion a la base de datos
 connectDB();
 

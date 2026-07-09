@@ -105,7 +105,7 @@ export const SongAdminController = class {
             success: true,
             message: "// Canción eliminada correctamente del sistema.",
             deletedRecord: {
-                id: deletedSong._id,
+                id: deletedSong.id,
                 title: deletedSong.title,
                 artist: deletedSong.artist
             }

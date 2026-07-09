@@ -201,7 +201,17 @@ export default function ThemesPage() {
                   </div>
 
                   {/* BOTÓN DE AUDITORÍA VISIBLE (UX Mejorada) + ACCIONES */}
-                  <div className="flex items-center gap-3 shrink-0 self-center md:self-auto">
+                  <div className="flex items-center gap-2 shrink-0 self-center md:self-auto">
+                    {/* 🎵 BOTÓN NUEVO: Acceso rápido para añadir canciones */}
+                    <button
+                      type="button"
+                      onClick={() => navigate('/songs', { state: { themeId: theme.id } })}
+                      className="px-3 py-1.5 bg-indigo-500 text-white rounded-xl text-xs font-bold"
+                    >
+                      + canciones
+                    </button>
+
+
                     {/* Botón de Auditoría siempre visible si la jornada no está vacía */}
                     <button 
                       onClick={() => navigate(`/themes/${theme.id}/audit`)}

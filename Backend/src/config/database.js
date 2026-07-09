@@ -3,7 +3,7 @@ import dns from 'dns';
 
 // En entornos de desarrollo, a veces el DNS puede causar problemas al resolver el host de MongoDB Atlas.
 if (process.env.NODE_ENV !== 'production') {
-    dns.setServers(['1.1.1.1', '8.8.8.8']);
+    dns.setServers(['1.1.1.1', '8.8.8.8', '0.0.0.0']);
 }
 
 export const connectDB = async () => {

@@ -5,10 +5,12 @@ import { songSchema } from '../schemas/songSchema';
 import { useThemes } from '../hooks/useThemes';
 import { useSongs } from '../hooks/useSongs';
 import { useSpotify } from '../hooks/useSpotify';
+import { useLocation } from 'react-router-dom';
 
 export default function SongsPage() {
   const { themes, isLoading: loadingThemes } = useThemes();
-  const [selectedThemeId, setSelectedThemeId] = useState('');
+  const location = useLocation(); // 2. Instanciamos el location
+  const [selectedThemeId, setSelectedThemeId] = useState(location.state?.themeId || '');
   const [isFocused, setIsFocused] = useState(false);
   
   const { 

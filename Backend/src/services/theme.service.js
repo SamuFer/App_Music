@@ -15,25 +15,62 @@ export const ThemeService = class {
       }
     }
 
-  // Para el Admin: Listar todos los temas ordenados por día (Paginados y Filtrados)
+  // Para el Admin: Listar todos los temas ordenados por día (Paginados y Filtrados) con estadísticas en tiempo real
   static async getAllAdmin({ title, limit, offset } = {}) {
      try {
-      const filter = title ? { title: { $regex: title, $options: "i" } } : {};
+      // 1. Definimos el filtro de búsqueda por título si el administrador escribió algo
+      const matchStage = title ? { title: { $regex: title, $options: "i" } } : {};
   
-      // Aquí traemos todo, incluyendo email y role
+      // 2. Ejecutamos la consulta agregada y el conteo de documentos en paralelo
       const [themes, total] = await Promise.all([
-        Theme.find(filter)
-          .limit(Number(limit))
-          .skip(Number(offset))
-          .sort({ createdAt: -1 }),
-        Theme.countDocuments(filter),
-      ])
+        Theme.aggregate([
+          // Paso A: Filtramos las temáticas según la búsqueda
+          { $match: matchStage },
+          
+          // Paso B: Cruzamos de forma inteligente con la colección de votos ("votes")
+          {
+            $lookup: {
+              from: "votes",           // Nombre exacto de la colección en MongoDB
+              localField: "_id",        // El ID de la temática
+              foreignField: "themeId",  // El campo con el que se relaciona en la colección votos
+              as: "votosAsociados"
+            }
+          },
+          
+          // Paso C: Calculamos los totales y promedios directamente en el motor de la DB
+          {
+            $addFields: {
+              votesCount: { $size: "$votosAsociados" },
+              averageScore: { $ifNull: [ { $avg: "$votosAsociados.score" }, 0 ] }
+            }
+          },
+          
+          // Paso D: Excluimos el array de votos asociados para que la respuesta de red sea ligera
+          {
+            $project: {
+              votosAsociados: 0
+            }
+          },
+          
+          // Paso E: Aplicamos el ordenamiento por fecha de creación y las reglas de paginación
+          { $sort: { createdAt: -1 } },
+          { $skip: Number(offset) || 0 },
+          { $limit: Number(limit) || 10 }
+        ]),
+        
+        Theme.countDocuments(matchStage),
+      ]);
 
-      return { themes, total }
+      // 3. Mapeamos de forma limpia los resultados para asegurar que mantengan el formato toJSON del helper
+      const sanitizedThemes = themes.map(theme => {
+        const { _id, ...rest } = theme;
+        return { id: _id.toString(), ...rest };
+      });
+
+      return { themes: sanitizedThemes, total };
       
     } catch (error) {
-      // Atrapamos el error de la DB y lo lanzamos con un texto claro
-      throw new AppError(`Error en el servidor al obtener las temáticas: ${error.message}`, 500)
+      throw new AppError(`Error en el servidor al obtener las temáticas con auditoría: ${error.message}`, 500);
     }
   }
 

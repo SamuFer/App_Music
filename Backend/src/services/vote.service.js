@@ -57,13 +57,28 @@ export const VoteService = class {
                 // 4. Nos quedamos con el podio (las 3 mejores puntuadas)
                 { $limit: 3 },
                 
+                // 🌟 PASO NUEVO: Cruzamos con la colección de canciones para obtener título y artista
+                {
+                    $lookup: {
+                        from: "songs",           // Nombre de tu colección de canciones en MongoDB (por defecto minúscula y plural)
+                        localField: "_id",       // El ID de la canción (que quedó en el _id del grupo)
+                        foreignField: "_id",     // El ID real en la colección de canciones
+                        as: "cancionInfo"
+                    }
+                },
+
+                // 🌟 PASO NUEVO: Deshacemos el array que genera el lookup (siempre habrá 1 coincidencia)
+                { $unwind: "$cancionInfo" },
+
                 // 5. Proyectamos el resultado final redondeando la nota a un decimal
                 {
                 $project: {
                     songId: "$_id",
                     _id: 0,
                     totalVotosEmitidos: 1,
-                    notaMedia: { $round: ["$notaMedia", 1] } // Redondea a un decimal (ej: 9.3)
+                    notaMedia: { $round: ["$notaMedia", 1] }, // Redondea a un decimal (ej: 9.3)
+                    title: "$cancionInfo.title",   // Inyectamos el título directo
+                    artist: "$cancionInfo.artist"  // Inyectamos el artista directo
                 }
                 }
             ])
@@ -133,24 +148,50 @@ export const VoteService = class {
         }
     }
 
-    // 4. NUEVO: DETALLE PROFUNDO DE UNA CANCIÓN INDIVIDUAL Y SUS VOTOS
+    // 4. DETALLE PROFUNDO DE UNA CANCIÓN INDIVIDUAL Y SUS VOTOS (CON NOMBRES DE USUARIO)
     static async getSongDetailsWithVotes(songId) {
         try {
             const song = await Song.findById(songId);
             if (!song) throw new AppError("La canción solicitada no existe.", 404);
 
             const statistics = await Vote.aggregate([
+                // Paso A: Filtramos únicamente los votos recibidos por esta canción
                 { $match: { songId: new mongoose.Types.ObjectId(songId) } },
+
+                // 🌟 PASO NUEVO: Cruzamos con la colección de usuarios ("users") para traer su información de perfil
                 {
-                    $group: {
-                        _id: null, // 👈 Cambiamos esto a null para que no repita el ID de la canción
-                        averageScore: { $avg: "$score" },
-                        totalVotes: { $sum: 1 },
-                        allVotes: { $push: { userId: "$userId", score: "$score", votedAt: "$createdAt" } }
+                    $lookup: {
+                        from: "users",           // Nombre exacto de tu colección de usuarios en MongoDB
+                        localField: "userId",     // El campo en la colección de votos
+                        foreignField: "_id",      // El ID real en la colección de usuarios
+                        as: "usuarioInfo"
                     }
                 },
+
+                // 🌟 PASO NUEVO: Deshacemos el array del lookup para transformarlo en objeto directo
+                { $unwind: "$usuarioInfo" },
+                
+                // Paso B: Agrupamos para calcular las métricas generales y estructurar la lista de votos
                 {
-                    $project: { _id: 0 } // 👈 Quitamos el campo _id por completo de las métricas
+                    $group: {
+                        _id: null, 
+                        averageScore: { $avg: "$score" },
+                        totalVotes: { $sum: 1 },
+                        // 🌟 MODIFICADO: En lugar de guardar solo el userId plano, empujamos el nombre del usuario
+                        allVotes: { 
+                            $push: { 
+                                userId: "$userId", 
+                                name: "$usuarioInfo.name", // ¡Inyectamos el nombre real aquí!
+                                score: "$score", 
+                                votedAt: "$createdAt" 
+                            } 
+                        }
+                    }
+                },
+                
+                // Paso C: Limpieza final del objeto de estadísticas
+                {
+                    $project: { _id: 0 } 
                 }
             ]);
 

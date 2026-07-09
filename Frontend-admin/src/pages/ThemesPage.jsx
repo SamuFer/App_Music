@@ -2,8 +2,11 @@ import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { themeSchema } from '../schemas/themeSchema'
 import { useThemes } from '../hooks/useThemes'
+import { useNavigate } from 'react-router-dom'
 
 export default function ThemesPage() {
+
+  const navigate = useNavigate()
   // 0. Usamos tu hook con la data real de formatPaginatedResponse
   const { themes, isLoading, createTheme, deleteTheme, isCreating, createThemeError, isCreateError } = useThemes()
 
@@ -192,7 +195,7 @@ export default function ThemesPage() {
                     <div className="text-center">
                       <span className="block text-[10px] font-bold text-slate-400 uppercase tracking-wider">Puntaje</span>
                       <span className="text-lg font-black text-indigo-600">
-                        {theme.averageScore ? theme.averageScore.toFixed(1) : '—'}
+                        {theme.averageScore ? theme.averageScore.toFixed(1) : '0.0'}
                       </span>
                     </div>
                   </div>
@@ -201,7 +204,7 @@ export default function ThemesPage() {
                   <div className="flex items-center gap-3 shrink-0 self-center md:self-auto">
                     {/* Botón de Auditoría siempre visible si la jornada no está vacía */}
                     <button 
-                      onClick={() => console.log(`Auditar jornada: ${theme.id}`)}
+                      onClick={() => navigate(`/themes/${theme.id}/audit`)}
                       className="px-3 py-1.5 bg-slate-50 hover:bg-indigo-50 border border-slate-200 hover:border-indigo-200 rounded-xl text-xs font-bold text-slate-600 hover:text-indigo-600 transition-all cursor-pointer flex items-center gap-1 shadow-sm"
                     >
                       📊 <span className="hidden lg:inline">Auditar Votos</span>

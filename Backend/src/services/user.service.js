@@ -108,6 +108,17 @@ export const UserService = class {
       throw new AppError(`Error en el servidor al intentar eliminar el usuario: ${error.message}`, 500)
     }
   }
+
+  // Obtener por Email incluyendo password (Exclusivo para proceso de Autenticación)
+  static async getByEmailWithPassword(email) {
+    try {
+      // Usamos .select('+password') por si acaso lo tienes configurado como oculto en tu Schema
+      return await User.findOne({ email }).select('+password');
+    } catch (error) {
+      throw new AppError(`Error en el servidor al buscar el usuario por email: ${error.message}`, 500);
+    }
+  }
+  
 // este bloque es para unificar el getAll y getAllAdmin, pero lo dejo comentado porque no es obligatorio y a veces es más claro tener métodos separados en el servicio para cada caso, aunque compartan lógica:
   //   static async getUsers({ name, limit, offset, isAdmin = false } = {}) {
   //   // El filtro es el mismo para ambos

@@ -1,6 +1,8 @@
 import { Link, Outlet } from 'react-router-dom';
+import { useAuth } from '../context/authContext'
 
 export default function Layout() {
+  const { user, logout } = useAuth(); // Extraemos el usuario y la función de salida
   return (
     <div className="flex min-h-screen bg-gray-100">
       {/* Sidebar */}
@@ -12,6 +14,21 @@ export default function Layout() {
           <Link to="/themes" className="block p-2 hover:bg-slate-700 rounded transition">🎵 Themes</Link>
           <Link to="/songs" className="block p-2 hover:bg-slate-700 rounded transition">🎵 Canciones</Link>
         </nav>
+        {/* Sección inferior con datos del Administrador y Cierre de Sesión */}
+        <div className="pt-4 border-t border-slate-700 space-y-3">
+          <div className="px-2">
+            <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Sesión como admin:</p>
+            <p className="text-xs font-semibold text-blue-300 truncate mt-0.5">{user?.email || 'Administrador'}</p>
+          </div>
+          
+          <button 
+            type="button"
+            onClick={logout}
+            className="w-full text-left p-2 bg-slate-700/50 hover:bg-red-900/40 hover:text-red-300 text-slate-300 rounded text-xs font-bold transition cursor-pointer"
+          >
+            🚪 Cerrar Sesión
+          </button>
+        </div>
       </aside>
 
       {/* Contenido Principal */}

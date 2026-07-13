@@ -17,6 +17,19 @@ export const SongAdminController = class {
                 return res.status(404).json({ error: "// No puedes añadir una canción a una temática que no existe." });
             }
 
+            // 🛡️ NUEVO ESCUDO: Verificar el estado y tiempo de la temática
+            const ahora = new Date();
+            // Regla A: Si ya figura como 'closed', se bloquea inmediatamente.
+            if (themeExists.status === 'closed') {
+                return res.status(400).json({ error: "// Error: No puedes añadir canciones. Esta temática ya está cerrada." });
+            }
+            // Regla B: Si dice 'active' pero el tiempo ya pasó, reparamos la DB y bloqueamos.
+            if (themeExists.status === 'active' && ahora > themeExists.votingDeadline) {
+                 // Autoreparamos el estado en la base de datos (igual que hicimos en votos)
+                 await ThemeService.autoCloseActiveThemes();
+                 return res.status(400).json({ error: "// Error: El tiempo para esta temática finalizó. No se admiten más canciones." });
+            }
+
             const newSong = await SongService.create({
                 themeId,
                 title,

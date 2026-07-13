@@ -11,7 +11,10 @@ import { voteValidatorRequest } from "../../../middlewares/validators/vote.valid
 export const adminThemeRoutes = Router()
 
 adminThemeRoutes.get('/', ThemeAdminController.getAll)
+adminThemeRoutes.get('/:id', themeValidator, ThemeAdminController.getById) // <-- NUEVA LÍNEA
 adminThemeRoutes.post('/', themeValidator, ThemeAdminController.create)
+adminThemeRoutes.put('/:id', themeValidator, ThemeAdminController.update) // NUEVO: Actualizar
+adminThemeRoutes.patch('/:id/force-close', themeValidator, ThemeAdminController.forceClose) // NUEVO: Cierre manual
 adminThemeRoutes.delete('/:id', themeValidator, ThemeAdminController.delete)
 
 adminThemeRoutes.get('/:themeId/songs', songValidator, SongAdminController.getByThemeId)

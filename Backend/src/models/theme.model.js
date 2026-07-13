@@ -17,7 +17,8 @@ const themeSchema = new mongoose.Schema({
         type: String,
         enum: ['upcoming', 'active', 'closed'],
         default: 'upcoming'
-    }
+    },
+    closedAt: { type: Date, default: null } // 👈 Tu nuevo campo de auditoría histórica
 },{ 
     // Agrega automáticamente campos createdAt y updatedAt
     timestamps: true 

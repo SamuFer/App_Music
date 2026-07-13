@@ -15,6 +15,21 @@ export const ThemeService = class {
       }
     }
 
+    // NUEVO: Para el Admin: Actualizar una temática por ID (Completa el CRUD)
+    static async update(id, data) {
+      try {
+        return await Theme.findByIdAndUpdate(id, data, {
+          returnDocument: 'after', // 👈 Cambiado aquí para eliminar el Warning de Mongoose
+          runValidators: true
+        });
+      } catch (error) {
+        if (error.code === 11000) {
+          throw new AppError("No se puede actualizar: El número de [day] ingresado ya está en uso por otra temática.", 409);
+        }
+        throw new AppError(`Error al actualizar la temática: ${error.message}`, 500);
+      }
+    }
+
   // Para el Admin: Listar todos los temas ordenados por día (Paginados y Filtrados) con estadísticas en tiempo real
   static async getAllAdmin({ title, limit, offset } = {}) {
      try {
@@ -88,18 +103,39 @@ export const ThemeService = class {
     }
   }
 
-  // Para el Cliente: Buscar el tema que está activo hoy según rango de fechas y estado
+  // OPTIMIZADO: Buscar el tema activo con escudo y transición en tiempo real
   static async getActive() {
     try {
-      const now = new Date()
-      // IMPORTANTE: Debe ser "find" para que devuelva un Array [] y no findOne que devuelve un objeto {}.
-      return await Theme.find({ // aqui se encuentra la condicion de que el tema esté activo, es decir, que su estado sea "active" y que la fecha actual esté entre startDate y votingDeadline
-        status: 'active', // el status lo da el admin al crear el tema
-        startDate: { $lte: now }, // El tema ya ha comenzado y $lte es "menor o igual que" y now es la fecha actual (now tine que ser mayor o igual a startDate para que el tema esté activo)
-        votingDeadline: { $gte: now } // El tema aún no ha cerrado para votación y $gte es "mayor o igual que" y now es la fecha actual ( now tiene que ser menor o igual a votingDeadline para que el tema esté activo)
-      }).sort({ day: 1 })
+      const now = new Date();
+
+      // 1. Buscamos si hay algún tema marcado como 'active'
+      let activeThemes = await Theme.find({ status: 'active' }).sort({ day: 1 })
+
+      // 💡 INTERCEPTOR: Si hay un tema activo pero su tiempo ya venció, forzamos el relevo inmediato
+      if (activeThemes.length > 0 && activeThemes[0].votingDeadline < now) {
+        console.log(`⚡ [Real-time Sync] Detectada temática caducada (${activeThemes[0].title}). Ejecutando transición...`)
+        await this.autoCloseActiveThemes();
+        
+        // Volvemos a consultar para traer el nuevo panorama real de la DB
+        activeThemes = await Theme.find({ status: 'active' }).sort({ day: 1 })
+      }
+
+      // 2. Si no había ninguno activo, validamos si ya es hora de activar el siguiente 'upcoming' en cola
+      if (activeThemes.length === 0) {
+        const nextUpcoming = await Theme.findOne({ status: 'upcoming', startDate: { $lte: now } }).sort({ day: 1 })
+        
+        if (nextUpcoming) {
+          nextUpcoming.status = 'active';
+          await nextUpcoming.save();
+          activeThemes = [nextUpcoming];
+        }
+      }
+
+      // Retornamos el array filtrado asegurando la consistencia de las fechas
+      return activeThemes.filter(theme => theme.startDate <= now && theme.votingDeadline >= now);
+
     } catch (error) {
-      throw new AppError(`Error en el servidor al buscar la temática activa: ${error.message}`, 500)
+      throw new AppError(`Error en el servidor al buscar la temática activa: ${error.message}`, 500);
     }
   }
 
@@ -114,38 +150,42 @@ export const ThemeService = class {
     }
   }
 
-  // NUEVO: Cerrar las temáticas activas que ya caducaron
-  static async autoCloseActiveThemes() {
+  // Cerrar las temáticas activas que ya caducaron (o se forzaron)
+  static async autoCloseActiveThemes() {  
     try {
-      // Opción A: Cerrar ABSOLUTAMENTE TODO lo que esté 'active' actualmente
-      // const result = await Theme.updateMany(
-      //   { status: "active" }, 
-      //   { $set: { status: "closed" } }
-      // );
-
-     // Opción B (Más profesional): Si tus temas tienen una fecha de finalización (endDate),
-      // 1. Cerramos las temáticas cuya fecha límite de votación ya venció
       const ahora = new Date();
+      
+      // 1. Cerramos las temáticas que caducaron. Guardamos la verdad histórica en closedAt
       const result = await Theme.updateMany(
         { status: "active", votingDeadline: { $lte: ahora } }, 
-        { $set: { status: "closed" } }
-      )
-      // 2. Buscamos la siguiente temática en cola para activar
-      const nextTheme = await Theme.findOne({ status: "upcoming" }).sort({ createdAt: 1 }) // O .sort({ startDate: 1 })
+        { 
+          $set: { 
+            status: "closed",
+            closedAt: ahora // 👈 Guardamos el hecho real aquí para tu análisis
+          } 
+        }
+      );
+      
+      // 2. Buscamos la siguiente temática en cola respetando estrictamente el calendario
+      const nextTheme = await Theme.findOne({ 
+        status: "upcoming", 
+        startDate: { $lte: ahora } 
+      }).sort({ day: 1 });
 
-      // 3. Si existe una temática futura, la activamos e impactamos en la DB aquí mismo
+      // 3. Si el calendario dice que ya llegó su hora de inicio, la activamos
       if (nextTheme) {
         nextTheme.status = "active";
         await nextTheme.save();
       }
 
-      // 4. Devolvemos un OBJETO con toda la información que el Cron necesita imprimir
       return {
         totalCerrados: result.modifiedCount,
-        nextTheme: nextTheme // Enviamos el documento entero (o null si no había)
-      }
+        nextTheme: nextTheme 
+      };
+      
     } catch (error) {
-      throw new AppError(`Error en el automatizador de temáticas: ${error.message}`, 500)
+      if (error instanceof AppError) throw error;
+      throw new AppError(`Error en el automatizador de temáticas: ${error.message}`, 500);
     }
   }
 

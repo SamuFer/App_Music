@@ -11,8 +11,8 @@ export const themeValidator = (req, res, next) => {
         })
     }
 
-    // 2. Solo si el Admin está intentando CREAR un tema (POST), validamos el cuerpo
-    if (req.method === 'POST') {
+    // 2. Solo si el Admin está intentando CREAR un tema (POST) o EDITAR uno (PUT), validamos el cuerpo
+    if (req.method === 'POST' || req.method === 'PUT') {
         const {title, day, votingDeadline} = req.body || {}
 
         // Validamos campos obligatorios esenciales para el juego
@@ -29,6 +29,10 @@ export const themeValidator = (req, res, next) => {
             });
         }
 
+    }
+    // Si es un PATCH, o viene un body vacío, nos aseguramos de que no rompa las validaciones inferiores
+    if (req.method === 'PATCH') {
+        return next(); // Los PATCH de emergencia no necesitan validar el cuerpo
     }
 
     next()

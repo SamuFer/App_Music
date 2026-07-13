@@ -7,6 +7,7 @@ import { VoteClientController } from "../../../controllers/client/vote.controlle
 
 import { songValidator } from "../../../middlewares/validators/song.validator.js"
 import { voteValidatorRequest } from "../../../middlewares/validators/vote.validator.js"
+import { verifyVoteWindow } from "../../../middlewares/timeGuard.js" // 👈 NUEVO: Importamos el Escudo de Tiempo
 
 export const clientThemeRoutes = Router()
 
@@ -15,7 +16,7 @@ clientThemeRoutes.get('/', ThemeClientController.getToday)
 clientThemeRoutes.get('/:themeId/songs', songValidator, SongClientController.getByThemeId) 
 
 // 1. Ruta para emitir un voto (Exige themeId, songId en URL y userId en Body)
-clientThemeRoutes.post('/:themeId/songs/:songId/votes', voteValidatorRequest, VoteClientController.castVote)
+clientThemeRoutes.post('/:themeId/songs/:songId/votes', voteValidatorRequest, verifyVoteWindow, VoteClientController.castVote)
 
 // 2. Ruta para ver los resultados en vivo de una temática (Exige themeId en URL)
 // clientThemeRoutes.get('/:themeId/votes/results', voteValidatorRequest, VoteClientController.getResults)

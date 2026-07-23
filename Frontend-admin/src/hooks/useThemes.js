@@ -30,6 +30,15 @@ export function useThemes() {
     }
   })
 
+  // ✏️ Agrega esta mutación para el UPDATE
+  const updateThemeMutation = useMutation({
+    mutationFn: ({ id, data }) => themesApi.update(id, data),
+    onSuccess: () => {
+      // Esto invalida la caché de temáticas y hace que se recarguen solas en pantalla
+      queryClient.invalidateQueries({ queryKey: ['themes'] }) 
+    }
+  })
+
   return {
     themes,
     isLoading,
@@ -38,6 +47,14 @@ export function useThemes() {
     deleteTheme: deleteThemeMutation.mutate,
 
     createThemeError: createThemeMutation.error,
-    isCreateError: createThemeMutation.isError
+    isCreateError: createThemeMutation.isError,
+    
+    // 🌟 Asegúrate de retornar estos tres elementos:
+    updateTheme: updateThemeMutation.mutate,
+    isUpdating: updateThemeMutation.isPending,
+    updateError: updateThemeMutation.error,
+    
+    // 🔄 Una función comodín para forzar el refresco manual cuando lo necesites
+    invalidateThemes: () => queryClient.invalidateQueries({ queryKey: ['themes'] })
   };
 }

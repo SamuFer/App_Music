@@ -3,11 +3,28 @@ import { AppError } from "../utils/customError.js"
 
 export const ThemeService = class {
     // Para el Admin: Crear un nuevo tema
-    static async create(input) {
+   static async create(input) {
       try {
+        const ahora = new Date();
+        const inicio = new Date(input.startDate);
+        const fin = new Date(input.votingDeadline);
+
+        // 🛡️ Validar consistencia básica de rangos
+        if (fin <= inicio) {
+          throw new AppError("La fecha límite de votación debe ser posterior a la fecha de inicio.", 400);
+        }
+
+        // 🛡️ Validar que la jornada no expire antes de nacer
+        if (fin <= ahora) {
+          throw new AppError("No se puede crear una temática cuya fecha límite de votación ya expiró.", 400);
+        }
+
+        // Aseguramos que el estado entre limpio en minúsculas por si acaso
+        if (input.status) input.status = input.status.toLowerCase();
+
         return await Theme.create(input);
       } catch (error) {
-        // Código de error de MongoDB para duplicados (en este caso, el campo único "day")
+        if (error instanceof AppError) throw error;
         if (error.code === 11000) { 
           throw new AppError("El [day] del tema ya está registrado porque debe ser un valor único. Por favor, elige otro número de día.", 409);
         }
@@ -18,11 +35,23 @@ export const ThemeService = class {
     // NUEVO: Para el Admin: Actualizar una temática por ID (Completa el CRUD)
     static async update(id, data) {
       try {
+        if (data.startDate && data.votingDeadline) {
+          const inicio = new Date(data.startDate);
+          const fin = new Date(data.votingDeadline);
+          
+          if (fin <= inicio) {
+            throw new AppError("La fecha límite de votación debe ser posterior a la fecha de inicio.", 400);
+          }
+        }
+
+        if (data.status) data.status = data.status.toLowerCase();
+
         return await Theme.findByIdAndUpdate(id, data, {
-          returnDocument: 'after', // 👈 Cambiado aquí para eliminar el Warning de Mongoose
+          returnDocument: 'after', 
           runValidators: true
         });
       } catch (error) {
+        if (error instanceof AppError) throw error;
         if (error.code === 11000) {
           throw new AppError("No se puede actualizar: El número de [day] ingresado ya está en uso por otra temática.", 409);
         }

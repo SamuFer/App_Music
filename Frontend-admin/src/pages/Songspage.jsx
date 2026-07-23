@@ -27,7 +27,22 @@ export default function SongsPage() {
   const { query, setQuery, tracks, loading: loadingSpotify, error: errorSpotify, setTracks } = useSpotify();
 
   const currentTheme = themes?.find(t => t.id === selectedThemeId);
-  const isThemeActive = currentTheme?.status === 'active';
+  // 🛡️ NUEVA VALIDACIÓN EN TIEMPO REAL (Espejo de las reglas de tu Backend)
+  const isThemeActive = (() => {
+    if (!currentTheme) return false;
+    
+    // Si explícitamente ya está guardada como cerrada
+    if (currentTheme.status === 'closed') return false;
+    
+    // Si está activa, pero el reloj ya superó el plazo de finalización
+    if (currentTheme.status === 'active') {
+      const ahora = new Date();
+      const deadline = new Date(currentTheme.votingDeadline);
+      if (ahora > deadline) return false; // Bloqueado por tiempo caducado
+    }
+    
+    return currentTheme.status === 'active';
+  })();
 
   // 2. Extraemos 'setValue' y 'watch' de react-hook-form
   const { register, handleSubmit, reset, setValue, watch, formState: { errors } } = useForm({
@@ -235,7 +250,11 @@ export default function SongsPage() {
                   🔒 JORNADA BLOQUEADA
                 </h3>
                 <p className="text-xs font-medium leading-relaxed">
-                  Solo se permite anidar o modificar canciones en temáticas que estén en estado <span className="font-bold underline">Active</span>. Esta jornada se encuentra actualmente en estado: <span className="font-bold uppercase">{currentTheme?.status}</span>.
+                  {currentTheme?.status === 'closed' ? (
+                    <span>Esta jornada ha sido **finalizada** formalmente. No se admiten modificaciones ni nuevas pistas.</span>
+                  ) : (
+                    <span>El tiempo límite de votación (`votingDeadline`) ya ha expirado. El sistema ha cerrado la admisión de canciones para esta temática o es una jornada UPCOMING.</span>
+                  )}
                 </p>
               </div>
             )}

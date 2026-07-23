@@ -10,6 +10,17 @@ export const themesApi = {
     body: JSON.stringify(data)
   }),
 
+  // ✏️ NUEVO: Actualizar temática (PUT)
+  update: (id, data) => apiFetch(`/themes/${id}`, {
+    method: 'PUT',
+    body: JSON.stringify(data)
+  }),
+
+  // 🔒 NUEVO: Forzar cierre manual de jornada (PATCH)
+  forceClose: (id) => apiFetch(`/themes/${id}/force-close`, {
+    method: 'PATCH'
+  }),
+
   // Elimina una temática usando el ID en los parámetros
   delete: (id) => apiFetch(`/themes/${id}`, { 
     method: 'DELETE' 

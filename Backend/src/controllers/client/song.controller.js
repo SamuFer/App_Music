@@ -14,7 +14,15 @@ export const SongClientController = class {
                     error: "// La temática solicitada no existe." 
                 });
             }
-
+            
+            const ahora = new Date()
+            if (themeExists.status === 'upcoming' || ahora < new Date(themeExists.startDate)) {
+                return res.status(200).json({
+                    success: true,
+                    message: "// Esta jornada aún no ha comenzado. ¡Las canciones estarán disponibles a partir de la fecha de inicio!",
+                    data: []
+                })
+            }
             // 2. Llamamos al nuevo método del servicio
             const songs = await SongService.getById(themeId)
 

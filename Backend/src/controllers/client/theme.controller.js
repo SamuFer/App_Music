@@ -40,4 +40,42 @@ export const ThemeClientController = class {
         })
       }
     }
+    
+    // OBTENER PRÓXIMAS TEMÁTICAS (Agenda / Expectativa)
+  static async getUpcoming(req, res) {
+    try {
+      const upcomingThemes = await ThemeService.getUpcoming();
+
+      if (!upcomingThemes || upcomingThemes.length === 0) {
+        return res.status(200).json({
+          success: true,
+          data: []
+        });
+      }
+
+      // Filtramos y entregamos solo los campos públicos relevantes
+      const cleanedThemes = upcomingThemes.map(theme => ({
+        id: theme.id || theme._id,
+        day: theme.day,
+        title: theme.title,
+        description: theme.description,
+        startDate: theme.startDate,
+        votingDeadline: theme.votingDeadline
+      }));
+
+      return res.status(200).json({
+        success: true,
+        data: cleanedThemes
+      });
+
+    } catch (error) {
+      if (error instanceof AppError) {
+        return res.status(error.statusCode).json({ error: `// ${error.message}` });
+      }
+
+      return res.status(500).json({
+        error: '// Ocurrió un error al cargar las próximas temáticas. Por favor, intenta más tarde.'
+      });
+    }
+  }
 }

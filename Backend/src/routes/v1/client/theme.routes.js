@@ -12,6 +12,7 @@ import { verifyVoteWindow } from "../../../middlewares/timeGuard.js" // 👈 NUE
 export const clientThemeRoutes = Router()
 
 clientThemeRoutes.get('/', ThemeClientController.getToday) 
+clientThemeRoutes.get('/upcoming', ThemeClientController.getUpcoming); // 👈 Nueva ruta
 
 clientThemeRoutes.get('/:themeId/songs', songValidator, SongClientController.getByThemeId) 
 

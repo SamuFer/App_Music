@@ -27,21 +27,21 @@ export default function SongsPage() {
   const { query, setQuery, tracks, loading: loadingSpotify, error: errorSpotify, setTracks } = useSpotify();
 
   const currentTheme = themes?.find(t => t.id === selectedThemeId);
-  // 🛡️ NUEVA VALIDACIÓN EN TIEMPO REAL (Espejo de las reglas de tu Backend)
-  const isThemeActive = (() => {
+  // 🛡️ NUEVA VALIDACIÓN EN TIEMPO REAL (Reflejo del Backend)
+  // Permite gestión en 'active' y 'upcoming', pero bloquea 'closed' o expiradas.
+  const canManageSongs = (() => {
     if (!currentTheme) return false;
     
     // Si explícitamente ya está guardada como cerrada
     if (currentTheme.status === 'closed') return false;
     
-    // Si está activa, pero el reloj ya superó el plazo de finalización
-    if (currentTheme.status === 'active') {
-      const ahora = new Date();
-      const deadline = new Date(currentTheme.votingDeadline);
-      if (ahora > deadline) return false; // Bloqueado por tiempo caducado
-    }
-    
-    return currentTheme.status === 'active';
+    // 2. Si el reloj ya superó el plazo de finalización, se bloquea por caducidad
+    const ahora = new Date();
+    const deadline = new Date(currentTheme.votingDeadline);
+    if (ahora > deadline) return false;
+
+    // 3. Permite tanto 'active' como 'upcoming'
+    return currentTheme.status === 'active' || currentTheme.status === 'upcoming';
   })();
 
   // 2. Extraemos 'setValue' y 'watch' de react-hook-form
@@ -53,7 +53,7 @@ export default function SongsPage() {
   const watchTitle = watch('title');
 
   const onSubmit = (data) => {
-    if (!isThemeActive) return;
+    if (!canManageSongs) return;
 
     const cleanThemeId = String(selectedThemeId).trim();
 
@@ -119,7 +119,7 @@ export default function SongsPage() {
           
           {/* PANEL IZQUIERDO: FORMULARIO DINÁMICO BASADO EN EL ESTADO */}
           <aside className="lg:col-span-4">
-            {isThemeActive ? (
+            {canManageSongs ? (
               <div className="bg-slate-900 text-white p-6 rounded-[2rem] shadow-xl space-y-6">
                 <div>
                   <h2 className="text-xl font-bold flex items-center gap-2">
@@ -287,7 +287,7 @@ export default function SongsPage() {
                       </div>
                     </div>
 
-                    {isThemeActive && (
+                    {canManageSongs && (
                       <button
                         onClick={() => deleteSong(song.id)}
                         className="p-2 text-slate-300 hover:text-red-500 hover:bg-red-50 rounded-xl transition-all cursor-pointer md:opacity-0 group-hover:opacity-100"

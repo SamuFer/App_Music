@@ -168,6 +168,25 @@ export const ThemeService = class {
     }
   }
 
+  /**
+   * Obtiene las próximas temáticas (Upcoming) ordenadas por fecha de inicio
+   */
+  static async getUpcoming() {
+    const now = new Date();
+
+    // Busca temáticas marcadas como 'upcoming' O cuya fecha de inicio aún no haya llegado
+    const upcomingThemes = await Theme.find({
+      $or: [
+        { status: 'upcoming' },
+        { startDate: { $gt: now } }
+      ]
+    })
+    .sort({ startDate: 1 }) // Ordenadas de la más cercana a la más lejana
+    .lean();
+
+    return upcomingThemes;
+  }
+
   // NUEVO: Buscar una temática por su ID
   static async getById(id) {
     // 💡 NOTA: Quitamos el "if (!isValidObjectId)" manual porque el middleware lo frenará en la puerta.

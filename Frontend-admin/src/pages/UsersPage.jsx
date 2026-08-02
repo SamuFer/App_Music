@@ -99,7 +99,8 @@ export default function UsersPage() {
                       </span>
                     </td>
                     <td className="p-4 text-right">
-                      <button onClick={() => deleteUser(user.id)} className="text-slate-300 hover:text-red-500 transition-colors p-2">
+                       {/* <button onClick={() => { if(window.confirm('🚨 ¿Eliminar permanentemente?')) deleteTheme(theme.id) }} className="p-2 bg-red-50 hover:bg-red-100 text-red-400 rounded-xl border border-red-100 cursor-pointer">🗑</button> */}
+                      <button onClick={() => { if(window.confirm('🚨 ¿Eliminar permanentemente el usuario?')) deleteUser(user.id)}} className="text-slate-300 hover:text-red-500 transition-colors p-2">
                         Eliminar
                       </button>
                     </td>

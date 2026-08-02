@@ -98,8 +98,8 @@ export const ThemeService = class {
           
           // Paso E: Aplicamos el ordenamiento por fecha de creación y las reglas de paginación
           { $sort: { createdAt: -1 } },
-          { $skip: Number(offset) || 0 },
-          { $limit: Number(limit) || 10 }
+          { $skip: Number(offset)}, // 🟢 Ya no requiere Number() ni || DEFAULTS porque viene limpio
+          { $limit: Number(limit)}  // 🟢 Ya no requiere Number() ni || DEFAULTS porque viene limpio
         ]),
         
         Theme.countDocuments(matchStage),

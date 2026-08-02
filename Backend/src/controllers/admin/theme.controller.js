@@ -1,5 +1,5 @@
 import { ThemeService } from "../../services/theme.service.js"
-// import { DEFAULTS } from "../../config/index.js"
+import { DEFAULTS } from "../../config/index.js"
 import { AppError } from "../../utils/customError.js"
 import { formatPaginatedResponse } from "../../utils/pagination.helper.js"
 
@@ -7,22 +7,24 @@ export const ThemeAdminController = class {
     // OBTENER TODAS LAS TEMÁTICAS CON PAGINACIÓN
     static async getAll(req, res) {
       try {
-        const { title, limit, offset } = req.query; 
-        const {themes, total} = await ThemeService.getAllAdmin({ title, limit, offset })
+        // 🟢 Sanitizamos los datos de la URL aquí
+        const limit = Number(req.query.limit) || DEFAULTS.LIMIT_PAGINATION;
+        const offset = Number(req.query.offset) || DEFAULTS.LIMIT_OFFSET;
+        const { title } = req.query;
+
+        // Pasamos datos limpios y garantizados
+        const { themes, total } = await ThemeService.getAllAdmin({ title, limit, offset });
         
-        // Simulación de paginación simple sobre el array de resultados
-        // (En el futuro esto lo manejará tu base de datos directamente)
-        // Le pasamos el array de datos al helper y él construye todo el JSON de respuesta con la sección de pagination incluida
-        const response = formatPaginatedResponse({data: themes, totalDocuments: total, limit, offset}) // [data] se utiliza cuando hay varias tematicas
+        // El helper solo empaqueta la respuesta final
+        const response = formatPaginatedResponse({ data: themes, totalDocuments: total, limit, offset });
         
-        return res.status(200).json(response)
+        return res.status(200).json(response);
 
       } catch (error) {
-        // Si el servicio falló, este catch evita que el servidor muera y responde con elegancia
         if (error instanceof AppError) {
-            return res.status(error.statusCode).json({ error: `// ${error.message}` })
+            return res.status(error.statusCode).json({ error: `// ${error.message}` });
         }
-        return res.status(500).json({ error: `// Error interno del servidor: ${error.message}` })
+        return res.status(500).json({ error: `// Error interno del servidor: ${error.message}` });
       }
     }
 

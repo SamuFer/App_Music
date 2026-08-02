@@ -1,54 +1,48 @@
 import mongoose from 'mongoose'
 import { User } from '../models/user.model.js'
-import { DEFAULTS } from '../config/server.js'
+// 💡 Ya no hace falta importar DEFAULTS aquí
 import {AppError} from '../utils/customError.js'
 
 
 export const UserService = class {
   // 1. VISTA PÚBLICA (Seguridad Máxima) | CLIENT METHODS
-  static async getAll({
-    name,
-    limit = DEFAULTS.LIMIT_PAGINATION,
-    offset = DEFAULTS.LIMIT_OFFSET,
-  } = {}) {
-    // NUEVO: Agregamos try/catch para proteger la consulta paralela de Mongoose
+  static async getAll({ name, limit, offset } = {}) {
     try {
       const filter = name
-        ? { name: { $regex: name, $options: "i" } } // Búsqueda parcial e insensible a mayúsculas
-        : {};
+        ? { name: { $regex: name, $options: "i" } }
+        : {}
 
-      // Aquí el .select('name') es OBLIGATORIO y no negociable para proteger la privacidad de los usuarios
+      // El Controller ya nos garantiza que 'limit' y 'offset' son números limpios
       const [users, total] = await Promise.all([
         User.find(filter)
           .select("name")
-          .limit(Number(limit))
-          .skip(Number(offset)),
+          .skip(offset)  // 🟢 Limpio, directo a MongoDB
+          .limit(limit), // 🟢 Limpio, directo a MongoDB
         User.countDocuments(filter),
       ]);
 
       return { users, total };
 
     } catch (error) {
-        throw new AppError(`Error en el servidor al obtener la lista pública de usuarios: ${error.message}`, 500)
+      throw new AppError(`Error en el servidor al obtener la lista pública de usuarios: ${error.message}`, 500)
     }
   }
 
   // 2. VISTA ADMIN (Acceso Total) | ADMIN METHODS
   static async getAllAdmin({ name, limit, offset } = {}) {
-    // NUEVO: Agregamos try/catch para proteger la consulta pesada del administrador
     try {
-      const filter = name ? { name: { $regex: name, $options: "i" } } : {};
+      const filter = name ? { name: { $regex: name, $options: "i" } } : {}
 
       // Aquí traemos todo, incluyendo email y role
       const [users, total] = await Promise.all([
         User.find(filter)
-          .limit(Number(limit))
-          .skip(Number(offset))
-          .sort({ createdAt: -1 }),
+          .sort({ createdAt: -1 }) // 👈 Ordenamos primero
+          .skip(offset)            // 👈 Paginación limpia
+          .limit(limit),           // 👈 Paginación limpia
         User.countDocuments(filter),
       ]);
 
-      return { users, total };
+      return { users, total }
 
     } catch (error) {
       throw new AppError(`Error en el servidor al obtener la lista de usuarios para el administrador: ${error.message}`, 500)

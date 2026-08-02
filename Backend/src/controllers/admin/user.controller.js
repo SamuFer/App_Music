@@ -1,23 +1,30 @@
 import { UserService } from '../../services/user.service.js';
 import {AppError} from '../../utils/customError.js'
 import { formatPaginatedResponse } from '../../utils/pagination.helper.js'
+import { DEFAULTS } from '../../config/index.js'
 
   export const UserAdminController = class {
     
     // 1. OBTENER TODOS LOS USUARIOS EN CRUDO (VISTA ADMIN)
     static async getAll(req, res) {
       try {
-        const { name, limit, offset } = req.query 
-        const {users, total} = await UserService.getAllAdmin({ name, limit, offset })
+        // 🟢 2. Normalizas los parámetros en la entrada HTTP
+        const limit = Number(req.query.limit) || DEFAULTS.LIMIT_PAGINATION;
+        const offset = Number(req.query.offset) || DEFAULTS.LIMIT_OFFSET;
+        const { name } = req.query;
 
+        // 3. Pasas variables 100% limpias al servicio
+        const { users, total } = await UserService.getAllAdmin({ name, limit, offset });
+
+        // 4. El helper empaqueta todo sin adivinar nada
         const response = formatPaginatedResponse({ data: users, totalDocuments: total, limit, offset });
-        return res.status(200).json(response)
+        return res.status(200).json(response);
 
       } catch (error) {
         if (error instanceof AppError) {
             return res.status(error.statusCode).json({ error: `// ${error.message}` });
         }
-        return res.status(500).json({ error: `// Error interno del servidor: ${error.message}` })
+        return res.status(500).json({ error: `// Error interno del servidor: ${error.message}` });
       }
     }
 

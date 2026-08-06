@@ -1,7 +1,7 @@
-import { UserService } from '../services/user.service.js';
-import { AppError } from '../utils/customError.js';
+import { UserService } from '../../services/user.service.js';
+import { AppError } from '../../utils/customError.js';
 
-export const AuthController = class {
+export const AdminAuthController = class {
   
   static async login(req, res) {
     try {
@@ -18,15 +18,19 @@ export const AuthController = class {
         throw new AppError("Credenciales incorrectas o usuario no registrado.", 401);
       }
 
+      // 🟢 ÚNICO CAMBIO: Validar si la cuenta está desactivada por Soft Delete
+      if (!user.isActive) {
+        throw new AppError("Esta cuenta ha sido desactivada. Ponte en contacto con soporte.", 403);
+      }
+
       // 2. Verificación de contraseña 
-      // Si usas bcrypt: const isMatch = await bcrypt.compare(password, user.password);
       const isMatch = user.password === password; 
 
       if (!isMatch) {
         throw new AppError("Credenciales incorrectas.", 401);
       }
 
-      // 3. Control de Autorización estricto: Solo dejamos pasar administradores al panel
+      // 3. Control de Autorización estricto (Mantendremos solo a los admins aquí)
       if (user.role !== 'admin') {
         throw new AppError("Acceso denegado. No tienes permisos de administrador.", 403);
       }
@@ -41,7 +45,7 @@ export const AuthController = class {
 
       return res.status(200).json({
         success: true,
-        message: "Autenticación exitosa",
+        message: "Autenticación de administrador exitosa",
         user: adminSession
       });
 

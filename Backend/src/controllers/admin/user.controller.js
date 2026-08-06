@@ -82,7 +82,7 @@ import { DEFAULTS } from '../../config/index.js'
       try {
         const { id } = req.params
         
-        // SEGURIDAD: Solo permitimos editar estos campos
+        // 🟢 No permitimos desactivar o reactivar para tener la logica separada del path vs update
         const { name, email, role } = req.body
 
         const updatedUser = await UserService.update(id, { name, email, role })
@@ -110,24 +110,46 @@ import { DEFAULTS } from '../../config/index.js'
     static async delete(req, res) {
       try {
         const { id } = req.params
-        const deletedUser = await UserService.delete(id)
+        const deactivatedUser = await UserService.delete(id)
 
-        if (!deletedUser) {
+        if (!deactivatedUser) {
             return res.status(404).json({ error: "// Usuario no encontrado" })
         }
 
         return res.status(200).json({
             success: true,
-            message: `Usuario con correo ${deletedUser.email} eliminado permanentemente del sistema`
+            message: `Usuario con correo ${deactivatedUser.email} desactivado permanentemente del sistema`
         })
 
       } catch (error) {
         if (error instanceof AppError) {
             return res.status(error.statusCode).json({ error: `// ${error.message}` })
         }
-        return res.status(500).json({ error: `// Error al eliminar usuario: ${error.message}` })
+        return res.status(500).json({ error: `// Error al desactivar usuario: ${error.message}` })
       }
     }
 
-    
+  // 6. REACTIVAR USUARIO
+  static async restore(req, res) {
+    try {
+      const { id } = req.params;
+      const restoredUser = await UserService.restore(id);
+
+      if (!restoredUser) {
+        return res.status(404).json({ error: "// Usuario no encontrado" });
+      }
+
+      return res.status(200).json({
+        success: true,
+        message: `Cuenta de ${restoredUser.email} reactivada con éxito`,
+        data: restoredUser
+      });
+
+    } catch (error) {
+      if (error instanceof AppError) {
+        return res.status(error.statusCode).json({ error: `// ${error.message}` });
+      }
+      return res.status(500).json({ error: `// Error al reactivar usuario: ${error.message}` });
+    }
+  }
   };

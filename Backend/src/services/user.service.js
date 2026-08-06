@@ -8,16 +8,15 @@ export const UserService = class {
   // 1. VISTA PÚBLICA (Seguridad Máxima) | CLIENT METHODS
   static async getAll({ name, limit, offset } = {}) {
     try {
-      const filter = name
-        ? { name: { $regex: name, $options: "i" } }
-        : {}
+      // 🟢 OBLIGATORIO: Solo traemos usuarios que estén activos
+      const filter = { isActive: true };
+      if (name) filter.name = { $regex: name, $options: "i" };
 
-      // El Controller ya nos garantiza que 'limit' y 'offset' son números limpios
       const [users, total] = await Promise.all([
         User.find(filter)
           .select("name")
-          .skip(offset)  // 🟢 Limpio, directo a MongoDB
-          .limit(limit), // 🟢 Limpio, directo a MongoDB
+          .skip(offset)
+          .limit(limit),
         User.countDocuments(filter),
       ]);
 
@@ -29,20 +28,22 @@ export const UserService = class {
   }
 
   // 2. VISTA ADMIN (Acceso Total) | ADMIN METHODS
-  static async getAllAdmin({ name, limit, offset } = {}) {
+  static async getAllAdmin({ name, limit, offset, isActive } = {}) {
     try {
-      const filter = name ? { name: { $regex: name, $options: "i" } } : {}
+      const filter = {};
+      if (name) filter.name = { $regex: name, $options: "i" };
+      // Opcional: El admin puede filtrar opcionalmente por activos/inactivos
+      if (isActive !== undefined) filter.isActive = isActive;
 
-      // Aquí traemos todo, incluyendo email y role
       const [users, total] = await Promise.all([
         User.find(filter)
-          .sort({ createdAt: -1 }) // 👈 Ordenamos primero
-          .skip(offset)            // 👈 Paginación limpia
-          .limit(limit),           // 👈 Paginación limpia
+          .sort({ createdAt: -1 })
+          .skip(offset)
+          .limit(limit),
         User.countDocuments(filter),
       ]);
 
-      return { users, total }
+      return { users, total };
 
     } catch (error) {
       throw new AppError(`Error en el servidor al obtener la lista de usuarios para el administrador: ${error.message}`, 500)
@@ -83,7 +84,7 @@ export const UserService = class {
     try {
       // Si el Admin intenta actualizar un email/username a uno que ya existe, saltará el error 11000
       return await User.findByIdAndUpdate(id, data, {
-        new: true, // Devuelve el documento actualizado
+        returnDocument: 'after', // 🟢 Reemplazado { new: true } y Devuelve el documento actualizado
         runValidators: true, // Asegura que se apliquen las validaciones del schema en la actualización
       })
     } catch (error) {
@@ -94,12 +95,30 @@ export const UserService = class {
     }
   }
 
-  // 3. BORRAR USUARIO
+  // 🟢 3. DESACTIVAR USUARIO (SOFT DELETE)
+  // Cambiamos findByIdAndDelete por findByIdAndUpdate para mantener la integridad del ranking
   static async delete(id) {
     try {
-      return await User.findByIdAndDelete(id);
+      return await User.findByIdAndUpdate(
+        id, 
+        { isActive: false, deletedAt: new Date() }, 
+        { returnDocument: 'after' } // 🟢 Reemplazado { new: true }
+      );
     } catch (error) {
-      throw new AppError(`Error en el servidor al intentar eliminar el usuario: ${error.message}`, 500)
+      throw new AppError(`Error en el servidor al intentar desactivar la cuenta del usuario: ${error.message}`, 500)
+    }
+  }
+
+  // 🟢 RESTAURAR USUARIO (Opcional, útil para el Panel Admin)
+  static async restore(id) {
+    try {
+      return await User.findByIdAndUpdate(
+        id, 
+        { isActive: true, deletedAt: null }, 
+        { returnDocument: 'after' } // 🟢 Reemplazado { new: true }
+      );
+    } catch (error) {
+      throw new AppError(`Error al reactivar la cuenta del usuario: ${error.message}`, 500)
     }
   }
 

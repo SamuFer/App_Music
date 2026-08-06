@@ -3,13 +3,14 @@ import { useresRouter } from './routes/users.js' // usuarios a traves de json
 // import { songsRouter } from './routes/songs.js'
 import { clientUserRoutes } from './routes/v1/client/user.routes.js' // usuarios a traves de mongoDB
 import { clientThemeRoutes } from './routes/v1/client/theme.routes.js'
+import { clientAuthRoutes } from './routes/v1/client/auth.routes.js'
 
 import { adminUserRoutes } from './routes/v1/admin/user.routes.js' 
 import { adminThemeRoutes } from './routes/v1/admin/theme.routes.js'
 import { adminSongRoutes } from './routes/v1/admin/song.routes.js'
 import { adminVoteRoutes } from './routes/v1/admin/vote.routes.js'
 import { adminSpotifyRoutes } from './routes/v1/admin/spotify.routes.js'
-import { AuthRoutes } from './routes/v1/auth.routes.js'
+import { adminAuthRoutes } from './routes/v1/admin/auth.routes.js'
 
 import { corsMiddleware } from './middlewares/cors.js'
 // import { DEFAULTS } from './config.js'
@@ -40,6 +41,7 @@ app.use('/api/users', useresRouter)
 // Las rutas del usuario
 app.use('/api/v1/users', clientUserRoutes)
 app.use('/api/v1/themes', clientThemeRoutes)
+app.use('/api/v1/auth', clientAuthRoutes)
 
 // Las rutas de admin
 app.use('/api/v1/admin/users', adminUserRoutes)
@@ -47,7 +49,7 @@ app.use('/api/v1/admin/themes', adminThemeRoutes)
 app.use('/api/v1/admin/songs', adminSongRoutes)
 app.use('/api/v1/admin/votes', adminVoteRoutes)
 app.use('/api/v1/admin/spotify', adminSpotifyRoutes)
-app.use('/api/v1/admin/auth', AuthRoutes)
+app.use('/api/v1/admin/auth', adminAuthRoutes)
 
 // Conexion a la base de datos
 connectDB();

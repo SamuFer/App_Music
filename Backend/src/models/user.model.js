@@ -23,6 +23,15 @@ const userSchema = new mongoose.Schema({
             type: String,
             enum: ['user', 'admin'],
             default: 'user'
+    },
+    // 🟢 NUEVOS CAMPOS PARA SOFT DELETE
+    isActive: {
+            type: Boolean,
+            default: true
+    },
+    deletedAt: {
+            type: Date,
+            default: null
     }
 },  {
     timestamps: true

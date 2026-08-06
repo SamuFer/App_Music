@@ -11,20 +11,30 @@ export const userValidatorRequest = (req, res, next) => {
         })
     }
 
-    // 2. Solo si el método es POST (creación de usuario), validamos los campos del Body
+    // 2. Solo si el método es POST, validamos el Body según el endpoint
     if (req.method === "POST") {
         const { email, name, password } = req.body || {}
 
-        // Validamos que existan los datos mínimos esenciales requeridos por el modelo
-        if (!email || !name || !password) {
-            return res.status(400).json({ 
-                error: "// Error: Faltan datos obligatorios para registrar al usuario (name, email y password)." 
-            })
+        // 🟢 CASO A: Es un LOGIN (no exigimos 'name')
+        if (req.path.includes('/login')) {
+            if (!email || !password) {
+                return res.status(400).json({ 
+                    error: "// Error: Faltan datos obligatorios para iniciar sesión (email y password)." 
+                })
+            }
+        } 
+        // 🟢 CASO B: Es un REGISTRO / CREACIÓN (sí exigimos 'name', 'email' y 'password')
+        else {
+            if (!email || !name || !password) {
+                return res.status(400).json({ 
+                    error: "// Error: Faltan datos obligatorios para registrar al usuario (name, email y password)." 
+                })
+            }
         }
         
-        // Validación extra básica de formato de correo en el backend
+        // Validación básica de email para cualquier POST
         const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
-        if (!emailRegex.test(email)) { // test() devuelve true si el email es válido, false si no lo es
+        if (email && !emailRegex.test(email)) {
             return res.status(400).json({ 
                 error: "// Error: El formato del correo electrónico proporcionado no es válido." 
             })
